@@ -1,0 +1,3 @@
+http://www.haskell.org/cabal/download.html
+http://askubuntu.com/questions/60218/how-to-add-a-directory-to-my-path
+http://www.haskell.org/haskellwiki/How_to_write_a_Haskell_program
