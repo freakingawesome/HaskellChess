@@ -10,10 +10,13 @@ boardSuite :: TestTree
 boardSuite = testGroup "Board" 
     [testCase "board size test" boardSizeTest,
      testCase "uneven board size test" unevenBoardSizeTest,
-     testCase "toAlgebraic" toAlgebraicTest,
-     testCase "toAlgebraic2" toAlgebraicTest2,
-     testCase "fromAlgebraic" fromAlgebraicTest,
-     testCase "fromAlgebraic2" fromAlgebraicTest2]
+     testCase "toAlgebraicLocation" toAlgebraicLocationTest,
+     testCase "toAlgebraicLocation2" toAlgebraicLocationTest2,
+     testCase "fromAlgebraicLocation" fromAlgebraicLocationTest,
+     testCase "fromAlgebraicLocation2" fromAlgebraicLocationTest2,
+     testCase "fromAlgebraicCharacterTest" fromAlgebraicCharacterTest,
+     testCase "fromAlgebraicCharacterLocationTest" fromAlgebraicCharacterLocationTest,
+     testCase "fromAlgebraicCharacterLocationTest2" fromAlgebraicCharacterLocationTest2]
 
 boardSizeTest :: Assertion
 boardSizeTest = 64 @=? boardSize (emptyBoard 8 8)
@@ -24,14 +27,29 @@ unevenBoardSizeTest = 20 @=? boardSize (emptyBoard 4 5)
 boardSize :: Board -> Int
 boardSize (Board x) = size x
 
-toAlgebraicTest :: Assertion
-toAlgebraicTest = "a1" @=? toAlgebraic (0,0)
+toAlgebraicLocationTest :: Assertion
+toAlgebraicLocationTest = "a1" @=? toAlgebraicLocation (0,0)
  
-toAlgebraicTest2 :: Assertion
-toAlgebraicTest2 = "c7" @=? toAlgebraic (2,6)
+toAlgebraicLocationTest2 :: Assertion
+toAlgebraicLocationTest2 = "c7" @=? toAlgebraicLocation (2,6)
 
-fromAlgebraicTest :: Assertion
-fromAlgebraicTest = (0,0) @=? fromAlgebraic "a1" 
+fromAlgebraicLocationTest :: Assertion
+fromAlgebraicLocationTest = (0,0) @=? fromAlgebraicLocation "a1" 
  
-fromAlgebraicTest2 :: Assertion
-fromAlgebraicTest2 = (2,6) @=? fromAlgebraic "c7"
+fromAlgebraicLocationTest2 :: Assertion
+fromAlgebraicLocationTest2 = (2,6) @=? fromAlgebraicLocation "c7"
+
+fromAlgebraicCharacterTest :: Assertion
+fromAlgebraicCharacterTest = do
+  Pawn @=? fromAlgebraicCharacter 'p'
+  Rook @=? fromAlgebraicCharacter 'R'
+  Knight @=? fromAlgebraicCharacter 'N'
+  Bishop @=? fromAlgebraicCharacter 'B'
+  Queen @=? fromAlgebraicCharacter 'Q'
+  King @=? fromAlgebraicCharacter 'K'
+
+fromAlgebraicCharacterLocationTest :: Assertion
+fromAlgebraicCharacterLocationTest = (Pawn,(1,1)) @=? fromAlgebraicCharacterLocation "pb2"
+
+fromAlgebraicCharacterLocationTest2 :: Assertion
+fromAlgebraicCharacterLocationTest2 = (King,(3,0)) @=? fromAlgebraicCharacterLocation "Kd1"
