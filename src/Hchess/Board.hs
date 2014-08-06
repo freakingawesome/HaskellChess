@@ -1,7 +1,7 @@
 module Hchess.Board (Board(Board),
   emptyBoard,
   newBoard,
-  --newStandardBoard,
+  newStandardBoard,
   toAlgebraicLocation,
   fromAlgebraicLocation,
   Character(Pawn,Rook,Knight,Bishop,Queen,King),
@@ -42,7 +42,6 @@ emptyBoard w h = Board (Map.fromList [ ((x,y), Nothing) | x <- [0..(w-1)], y <- 
 
 newBoard :: Int -> Int -> [(Team,String)] -> Board
 newBoard w h [] = emptyBoard w h
---newBoard w h (x:xs) = placeTeam (newBoard w h (splitOn " " xs)) x
 newBoard w h (x:xs) = placeTeam (newBoard w h xs) x
 
 placeTeam :: Board -> (Team,String) -> Board
@@ -54,9 +53,11 @@ placeTeamPlayers b (t,(p:ps)) = let (character,location) = fromAlgebraicCharacte
                                 in placePiece (placeTeamPlayers b (t,ps)) location (Piece t character [])
 
 placePiece :: Board -> Location -> Piece -> Board
-placePiece (Board m) (x,y) p = Board m
---newStandardBoard :: String -> Board
---newStandardBoard [] = emptyBoard 8 8
+placePiece (Board m) (x,y) p = let insertOrFail val = if val == Nothing then Just (Just p) else error "Square is already occupied"
+                               in Board (Map.update insertOrFail (x,y) m)
+
+newStandardBoard :: Team -> Team -> Board
+newStandardBoard t1 t2 = newBoard 8 8 [(t1,"pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2 Ra1 Nb1 Bc1 Qd1 Ke1 Bf1 Ng1 Rh1"),(t2,"pa7 pb7 pc7 pd7 pe7 pf7 pg7 ph7 Ra8 Nb8 Bc8 Qd8 Ke8 Bf8 Ng8 Rh8")] 
 
 toAlgebraicLocation :: Location -> String
 toAlgebraicLocation (x,y) = charToString (chr (x + 97)) ++ show (y + 1)
