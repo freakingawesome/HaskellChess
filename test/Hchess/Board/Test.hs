@@ -15,6 +15,8 @@ boardSuite = testGroup "Board"
      testCase "fromAlgebraicLocation" fromAlgebraicLocationTest,
      testCase "fromAlgebraicLocation2" fromAlgebraicLocationTest2,
      testCase "fromAlgebraicCharacterTest" fromAlgebraicCharacterTest,
+     --testCase "newStandardBoardTest" newStandardBoardTest,
+     testCase "newBoardTest_Pawn_a2" newBoardTest_Pawn_a2,
      testCase "fromAlgebraicCharacterLocationTest" fromAlgebraicCharacterLocationTest,
      testCase "fromAlgebraicCharacterLocationTest2" fromAlgebraicCharacterLocationTest2]
 
@@ -53,3 +55,17 @@ fromAlgebraicCharacterLocationTest = (Pawn,(1,1)) @=? fromAlgebraicCharacterLoca
 
 fromAlgebraicCharacterLocationTest2 :: Assertion
 fromAlgebraicCharacterLocationTest2 = (King,(3,0)) @=? fromAlgebraicCharacterLocation "Kd1"
+
+teamBlack :: Team
+teamBlack = Team North "Black"
+
+blackPawn :: Piece
+blackPawn = Piece teamBlack Pawn []
+
+--newStandardBoardTest :: Assertion
+--newStandardBoardTest = emptyBoard 8 8 @=? newStandardBoard []
+
+newBoardTest_Pawn_a2 :: Assertion
+newBoardTest_Pawn_a2 = Just blackPawn @=? pieceAt (0,1) (newBoard 8 8 [(teamBlack,"pa2")])
+
+
