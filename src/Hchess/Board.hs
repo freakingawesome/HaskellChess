@@ -10,13 +10,16 @@ module Hchess.Board (Board(Board),
   Location,
   Piece(Piece),
   pieceAt,
+  placePiece,
   Square,
   fromAlgebraicCharacter,
-  fromAlgebraicCharacterLocation) where
+  fromAlgebraicCharacterLocation,
+  possibleMoves) where
 
 import qualified Data.Map as Map
 import Data.Char (chr,ord)
 import Data.List.Split (splitOn)
+import Data.Maybe (fromJust)
 
 data Character = Pawn | Rook | Knight | Bishop | Queen | King
                  deriving (Show,Eq)
@@ -31,6 +34,8 @@ type Location = (Int,Int)
 
 data Piece = Piece Team Character [Location]
              deriving (Show,Eq)
+
+type CapturedPieceMap = Map.Map Team [Piece]
 
 type Square = Maybe Piece
 
@@ -85,6 +90,42 @@ fromAlgebraicCharacterLocation (x:xs) = (fromAlgebraicCharacter x,fromAlgebraicL
 pieceAt :: Location -> Board -> Square
 pieceAt (x,y) (Board m) = case Map.lookup (x,y) m of Nothing -> Nothing
                                                      Just x -> x
+
+
+----------------------------
+possibleMoves :: Board -> Location -> [Location]
+possibleMoves b l =
+  let p = pieceAt l b
+  in if p == Nothing then error "No piece at this location" else possibleMovesByPiece b l (fromJust p) 
+
+
+possibleMovesByPiece :: Board -> Location -> Piece -> [Location]
+
+-- Pawn
+possibleMovesByPiece b (x,y) (Piece (Team aff tname) Pawn ls) =
+  if ls == [] then [(x,y+1),(x,y+2)] else [(x,y+1)]
+
+
+
+
+-- One last catch-all for unknown pieces
+possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ (show p))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -19,7 +19,9 @@ boardSuite = testGroup "Board"
      testCase "newBoardTest_Pawn_a2" newBoardTest_Pawn_a2,
      testCase "nnewboardTest_Rook_a1_OppositeKing_d" newboardTest_Rook_a1_OppositeKing_d8,
      testCase "fromAlgebraicCharacterLocationTest" fromAlgebraicCharacterLocationTest,
-     testCase "fromAlgebraicCharacterLocationTest2" fromAlgebraicCharacterLocationTest2]
+     testCase "fromAlgebraicCharacterLocationTest2" fromAlgebraicCharacterLocationTest2,
+     testCase "possibleMoves_singlePawn_d2" possibleMoves_singlePawn_d2,
+     testCase "possibleMoves_singlePawn_d3" possibleMoves_singlePawn_d3]
 
 boardSizeTest :: Assertion
 boardSizeTest = 64 @=? boardSize (emptyBoard 8 8)
@@ -83,3 +85,36 @@ newboardTest_Rook_a1_OppositeKing_d8 = do
   Just (Piece teamWhite King []) @=? pieceAt (3,7) b
   Nothing @=? pieceAt (2,2) b
   where b = newBoard 8 8 [(teamBlack,"Ra1"),(teamWhite,"Kd8")]
+
+
+
+------------------
+possibleMoves_singlePawn_d2 :: Assertion
+possibleMoves_singlePawn_d2 = [(fromAlgebraicLocation "d3"),(fromAlgebraicLocation "d4")] @=? possibleMoves (newBoard 8 8 [(teamBlack,"pd2")]) (fromAlgebraicLocation "d2")
+
+possibleMoves_singlePawn_d3 :: Assertion
+possibleMoves_singlePawn_d3 = [fromAlgebraicLocation "d4"] @=? possibleMoves (pawnMovedAlready (newBoard 8 8 [])) (fromAlgebraicLocation "d3")
+  where pawnMovedAlready b = placePiece b (fromAlgebraicLocation "d3") (Piece teamBlack Pawn [fromAlgebraicLocation "d2"])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
