@@ -20,8 +20,9 @@ boardSuite = testGroup "Board"
      testCase "nnewboardTest_Rook_a1_OppositeKing_d" newboardTest_Rook_a1_OppositeKing_d8,
      testCase "fromAlgebraicCharacterLocationTest" fromAlgebraicCharacterLocationTest,
      testCase "fromAlgebraicCharacterLocationTest2" fromAlgebraicCharacterLocationTest2,
-     testCase "possibleMoves_singlePawn_d2" possibleMoves_singlePawn_d2,
-     testCase "possibleMoves_singlePawn_d3" possibleMoves_singlePawn_d3]
+     testCase "possibleMoves_singleWhitePawn_d2" possibleMoves_singleWhitePawn_d2,
+     testCase "possibleMoves_singleWhitePawn_d3" possibleMoves_singleWhitePawn_d3,
+     testCase "possibleMoves_singleBlackPawn_d7" possibleMoves_singleBlackPawn_d7]
 
 boardSizeTest :: Assertion
 boardSizeTest = 64 @=? boardSize (emptyBoard 8 8)
@@ -89,14 +90,17 @@ newboardTest_Rook_a1_OppositeKing_d8 = do
 
 
 ------------------
-possibleMoves_singlePawn_d2 :: Assertion
-possibleMoves_singlePawn_d2 = [(fromAlgebraicLocation "d3"),(fromAlgebraicLocation "d4")] @=? possibleMoves (newBoard 8 8 [(teamBlack,"pd2")]) (fromAlgebraicLocation "d2")
+possibleMoves_singleWhitePawn_d2 :: Assertion
+possibleMoves_singleWhitePawn_d2 = [(fromAlgebraicLocation "d3"),(fromAlgebraicLocation "d4")] @=? possibleMoves (newBoard 8 8 [(teamWhite,"pd2")]) (fromAlgebraicLocation "d2")
 
-possibleMoves_singlePawn_d3 :: Assertion
-possibleMoves_singlePawn_d3 = [fromAlgebraicLocation "d4"] @=? possibleMoves (pawnMovedAlready (newBoard 8 8 [])) (fromAlgebraicLocation "d3")
-  where pawnMovedAlready b = placePiece b (fromAlgebraicLocation "d3") (Piece teamBlack Pawn [fromAlgebraicLocation "d2"])
+possibleMoves_singleWhitePawn_d3 :: Assertion
+possibleMoves_singleWhitePawn_d3 = [fromAlgebraicLocation "d4"] @=? possibleMoves (pawnMovedAlready (newBoard 8 8 [])) (fromAlgebraicLocation "d3")
+  where pawnMovedAlready b = placePiece b (fromAlgebraicLocation "d3") (Piece teamWhite Pawn [fromAlgebraicLocation "d2"])
 
 
+possibleMoves_singleBlackPawn_d7 :: Assertion
+possibleMoves_singleBlackPawn_d7 = [fromAlgebraicLocation "d5"] @=? possibleMoves (pawnMovedAlready (newBoard 8 8 [])) (fromAlgebraicLocation "d6")
+  where pawnMovedAlready b = placePiece b (fromAlgebraicLocation "d6") (Piece teamBlack Pawn [fromAlgebraicLocation "d7"])
 
 
 

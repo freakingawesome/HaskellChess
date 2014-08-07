@@ -98,13 +98,23 @@ possibleMoves b l =
   let p = pieceAt l b
   in if p == Nothing then error "No piece at this location" else possibleMovesByPiece b l (fromJust p) 
 
+relLoc :: Location -> Affinity -> (Int,Int) -> Location
+relLoc (x,y) North (r,f) = (x+r,y+f)
+relLoc (x,y) East (r,f) = (x+f,y-r)
+relLoc (x,y) South (r,f) = (x-r,y-f)
+relLoc (x,y) West (r,f) = (x-f,y+r)
 
 possibleMovesByPiece :: Board -> Location -> Piece -> [Location]
 
 -- Pawn
-possibleMovesByPiece b (x,y) (Piece (Team aff tname) Pawn ls) =
-  if ls == [] then [(x,y+1),(x,y+2)] else [(x,y+1)]
-
+possibleMovesByPiece b l (Piece (Team aff tname) Pawn ls) =
+  let 
+    newpos = if ls == [] then 
+      [fwd 1,fwd 2] 
+    else 
+      [fwd 1]
+  in newpos
+  where fwd n = relLoc l aff (0, n)
 
 
 
