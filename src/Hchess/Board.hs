@@ -46,12 +46,12 @@ type CapturedPieceMap = Map.Map Team [Piece]
 type Square = Maybe Piece
 
 data Board = 
-  Board (Map.Map Location Square)
+  Board (Map.Map Location Square) CapturedPieceMap
   deriving (Show,Eq)
 
 emptyBoard :: Int -> Int -> Board
 emptyBoard w h = 
-  Board (Map.fromList [ ((x,y), Nothing) | x <- [0..(w-1)], y <- [0..(h-1)] ])
+  Board (Map.fromList [ ((x,y), Nothing) | x <- [0..(w-1)], y <- [0..(h-1)] ]) Map.empty
 
 newBoard :: Int -> Int -> [(Team,String)] -> Board
 newBoard w h [] = emptyBoard w h
@@ -67,14 +67,14 @@ placeTeamPlayers b (t,(p:ps)) =
   in placePiece (placeTeamPlayers b (t,ps)) location (Piece t character [])
 
 placePiece :: Board -> Location -> Piece -> Board
-placePiece (Board m) (x,y) p = 
+placePiece (Board m capt) (x,y) p = 
   let 
     insertOrFail val = 
       if val == Nothing then 
         Just (Just p) 
       else 
         error "Square is already occupied"
-  in Board (Map.update insertOrFail (x,y) m)
+  in Board (Map.update insertOrFail (x,y) m) capt
 
 newStandardBoard :: Team -> Team -> Board
 newStandardBoard t1 t2 = newBoard 8 8 [
@@ -107,7 +107,7 @@ fromAlgebraicCharacterLocation (x:xs) =
 
 
 pieceAt :: Location -> Board -> Square
-pieceAt (x,y) (Board m) = 
+pieceAt (x,y) (Board m _) = 
   case Map.lookup (x,y) m of 
     Nothing -> Nothing
     Just x -> x

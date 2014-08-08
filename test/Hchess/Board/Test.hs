@@ -32,7 +32,7 @@ unevenBoardSizeTest :: Assertion
 unevenBoardSizeTest = 20 @=? boardSize (emptyBoard 4 5)
 
 boardSize :: Board -> Int
-boardSize (Board x) = size x
+boardSize (Board x _) = size x
 
 toAlgebraicLocationTest :: Assertion
 toAlgebraicLocationTest = "a1" @=? toAlgebraicLocation (0,0)
