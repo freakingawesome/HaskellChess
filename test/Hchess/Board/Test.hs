@@ -7,22 +7,23 @@ import Hchess.Board
 import Data.Map (size)
 
 boardSuite :: TestTree
-boardSuite = testGroup "Board" 
-    [testCase "board size test" boardSizeTest,
-     testCase "uneven board size test" unevenBoardSizeTest,
-     testCase "toAlgebraicLocation" toAlgebraicLocationTest,
-     testCase "toAlgebraicLocation2" toAlgebraicLocationTest2,
-     testCase "fromAlgebraicLocation" fromAlgebraicLocationTest,
-     testCase "fromAlgebraicLocation2" fromAlgebraicLocationTest2,
-     testCase "fromAlgebraicCharacterTest" fromAlgebraicCharacterTest,
-     testCase "newStandardBoardTest" newStandardBoardTest,
-     testCase "newBoardTest_Pawn_a2" newBoardTest_Pawn_a2,
-     testCase "nnewboardTest_Rook_a1_OppositeKing_d" newboardTest_Rook_a1_OppositeKing_d8,
-     testCase "fromAlgebraicCharacterLocationTest" fromAlgebraicCharacterLocationTest,
-     testCase "fromAlgebraicCharacterLocationTest2" fromAlgebraicCharacterLocationTest2,
-     testCase "possibleMoves_singleWhitePawn_d2" possibleMoves_singleWhitePawn_d2,
-     testCase "possibleMoves_singleWhitePawn_d3" possibleMoves_singleWhitePawn_d3,
-     testCase "possibleMoves_singleBlackPawn_d7" possibleMoves_singleBlackPawn_d7]
+boardSuite = testGroup "Board" [
+  testCase "board size test" boardSizeTest,
+  testCase "uneven board size test" unevenBoardSizeTest,
+  testCase "toAlgebraicLocation" toAlgebraicLocationTest,
+  testCase "toAlgebraicLocation2" toAlgebraicLocationTest2,
+  testCase "fromAlgebraicLocation" fromAlgebraicLocationTest,
+  testCase "fromAlgebraicLocation2" fromAlgebraicLocationTest2,
+  testCase "fromAlgebraicCharacterTest" fromAlgebraicCharacterTest,
+  testCase "newStandardBoardTest" newStandardBoardTest,
+  testCase "newBoardTest_Pawn_a2" newBoardTest_Pawn_a2,
+  testCase "nnewboardTest_Rook_a1_OppositeKing_d" newboardTest_Rook_a1_OppositeKing_d8,
+  testCase "fromAlgebraicCharacterLocationTest" fromAlgebraicCharacterLocationTest,
+  testCase "fromAlgebraicCharacterLocationTest2" fromAlgebraicCharacterLocationTest2,
+  testCase "possibleMoves_singleWhitePawn_d2" possibleMoves_singleWhitePawn_d2,
+  testCase "possibleMoves_singleWhitePawn_d3" possibleMoves_singleWhitePawn_d3,
+  testCase "possibleMoves_singleBlackPawn_d7" possibleMoves_singleBlackPawn_d7
+  ]
 
 boardSizeTest :: Assertion
 boardSizeTest = 64 @=? boardSize (emptyBoard 8 8)
