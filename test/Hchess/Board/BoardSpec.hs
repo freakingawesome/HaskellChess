@@ -71,6 +71,18 @@ spec = do
     it "can move to either d3 or d4 if isolated" $ do
       stdPossibleMoves [(teamWhite,"pd2")] "d2" `shouldBe` locs ["d3", "d4"]
      
+    it "can move to only d3 if d4 is occupied by a teammate" $ do
+      stdPossibleMoves [(teamWhite,"pd2 pd4")] "d2" `shouldBe` locs ["d3"]
+
+    it "can move to only d3 if d4 is occupied by an enemty" $ do
+      stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pd4")] "d2" `shouldBe` locs ["d3"]
+
+    it "cannot move if d3 is occupied by a teammate" $ do
+      stdPossibleMoves [(teamWhite,"pd2 pd3")] "d2" `shouldBe` []
+
+    it "cannot move if d3 is occupied by an enemy" $ do
+      stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pd3")] "d2" `shouldBe` []
+
   describe "A white pawn on a standard board at d3" $ do
     it "can move to only d4 if isolated" $ do 
       stdPossibleMovesWithHistory [(teamWhite,"pd3")] [("d3",["d2"])] "d3" `shouldBe` locs ["d4"]
@@ -87,7 +99,6 @@ spec = do
     boardSize (Board x _) = Map.size x
     teamBlack = Team South "Black"
     teamWhite = Team North "White"
-    blackPawn = Piece teamBlack Pawn []
     standardBoardPieceAt s = pieceAt (fromAlgebraicLocation s) (newStandardBoard teamWhite teamBlack)
     b8x8 ps = newBoard 8 8 ps
     stdPossibleMoves ts al = possibleMoves (b8x8 ts) (fromAlgebraicLocation al)

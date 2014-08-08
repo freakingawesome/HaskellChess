@@ -1,22 +1,4 @@
-module Hchess.Board (
-  Board(Board),
-  emptyBoard,
-  newBoard,
-  newStandardBoard,
-  toAlgebraicLocation,
-  fromAlgebraicLocation,
-  Character(Pawn,Rook,Knight,Bishop,Queen,King),
-  Affinity(North,East,South,West),
-  Team(Team),
-  Location,
-  Piece(Piece),
-  pieceAt,
-  placePiece,
-  Square,
-  fromAlgebraicCharacter,
-  fromAlgebraicCharacterLocation,
-  possibleMoves,
-  ) where
+module Hchess.Board where
 
 import qualified Data.Map as Map
 import Data.Char (chr,ord)
@@ -132,13 +114,13 @@ relLoc (x,y) West (r,f) = (x-f,y+r)
 possibleMovesByPiece :: Board -> Location -> Piece -> [Location]
 
 -- Pawn
-possibleMovesByPiece b l (Piece (Team aff tname) Pawn ls) =
+possibleMovesByPiece (Board m capt) l (Piece (Team aff tname) Pawn ls) =
   let 
     newpos = if ls == [] then 
       [fwd 1,fwd 2] 
     else 
       [fwd 1]
-  in newpos
+  in filterUnoccupied (Board m capt) newpos
   where fwd n = relLoc l aff (0, n)
 
 
@@ -147,8 +129,8 @@ possibleMovesByPiece b l (Piece (Team aff tname) Pawn ls) =
 possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ (show p))
 
 
-
-
+filterUnoccupied :: Board -> [Location] -> [Location]
+filterUnoccupied b ls = filter (\x -> pieceAt x b == Nothing) ls
 
 
 
