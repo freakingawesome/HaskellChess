@@ -92,6 +92,8 @@ spec = do
       stdPossibleMovesWithHistory [(teamBlack,"pd6")] [("d6",["d7"])] "d6" `shouldBe` locs ["d5"]
   
   describe "Some internal tests of helper functions" $ do
+		let a = 1
+		in
     it "should be able to inject a piece's history" $ do
       injectPieceHistory (Piece teamBlack Pawn []) ["a1","b2"] `shouldBe` Piece teamBlack Pawn (locs ["a1","b2"])
  
