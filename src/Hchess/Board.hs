@@ -117,12 +117,11 @@ possibleMovesByPiece :: Board -> Location -> Piece -> [Location]
 possibleMovesByPiece (Board m capt) l (Piece (Team aff tname) Pawn ls) =
   let 
     newpos = if ls == [] then 
-      [fwd 1,fwd 2] 
+      lineOfSightUnoccupied (Board m capt) [fwd 1,fwd 2] 
     else 
-      [fwd 1]
-  in filterUnoccupied (Board m capt) newpos
+      filterUnoccupied (Board m capt) [fwd 1]
+  in newpos
   where fwd n = relLoc l aff (0, n)
-
 
 
 -- One last catch-all for unknown pieces
@@ -132,16 +131,14 @@ possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ (show p))
 filterUnoccupied :: Board -> [Location] -> [Location]
 filterUnoccupied b ls = filter (\x -> pieceAt x b == Nothing) ls
 
-
-
-
-
-
-
-
-
-
-
+-- Assumes head to tail is a single line of sight
+lineOfSightUnoccupied :: Board -> [Location] -> [Location]
+lineOfSightUnoccupied b [] = []
+lineOfSightUnoccupied b (l:ls) = 
+  if pieceAt l b == Nothing then 
+    l:(lineOfSightUnoccupied b ls) 
+  else 
+    []
 
 
 

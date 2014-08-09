@@ -74,7 +74,7 @@ spec = do
     it "can move to only d3 if d4 is occupied by a teammate" $ do
       stdPossibleMoves [(teamWhite,"pd2 pd4")] "d2" `shouldBe` locs ["d3"]
 
-    it "can move to only d3 if d4 is occupied by an enemty" $ do
+    it "can move to only d3 if d4 is occupied by an enemy" $ do
       stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pd4")] "d2" `shouldBe` locs ["d3"]
 
     it "cannot move if d3 is occupied by a teammate" $ do
@@ -94,7 +94,7 @@ spec = do
   describe "Some internal tests of helper functions" $ do
     it "should be able to inject a piece's history" $ do
       injectPieceHistory (Piece teamBlack Pawn []) ["a1","b2"] `shouldBe` Piece teamBlack Pawn (locs ["a1","b2"])
-       
+ 
   where 
     boardSize (Board x _) = Map.size x
     teamBlack = Team South "Black"
