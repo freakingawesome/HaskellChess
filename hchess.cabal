@@ -29,6 +29,7 @@ executable hchess
 library
   exposed-modules:      Hchess
                         , Hchess.Board
+                        , Hchess.Moves
   -- other-modules:
   -- other-extensions:
   build-depends:        base >=4.6 && <4.7,
