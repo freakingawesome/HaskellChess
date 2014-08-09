@@ -56,40 +56,43 @@ spec = do
  
   describe "A new standard board" $ do
     it "should find a black rook at a8" $ do
-      standardBoardPieceAt "a8" `shouldBe` Just (Piece teamBlack Rook [])
+      standardBoardPieceAt "a8" `shouldBe` Right (Just (Piece teamBlack Rook []))
 
     it "should find a white king at e1" $ do
-      standardBoardPieceAt "e1" `shouldBe` Just (Piece teamWhite King [])
+      standardBoardPieceAt "e1" `shouldBe` Right (Just (Piece teamWhite King []))
 
     it "should find a black king at e8" $ do
-      standardBoardPieceAt "e8" `shouldBe` Just (Piece teamBlack King [])
+      standardBoardPieceAt "e8" `shouldBe` Right (Just (Piece teamBlack King []))
 
     it "should find nothing in the middle of the board" $ do
-      standardBoardPieceAt "d4" `shouldBe` Nothing
+      standardBoardPieceAt "d4" `shouldBe` Right Nothing
+
+    it "should tell you if a location is invalid" $ do
+      standardBoardPieceAt "z9" `shouldBe` Left "Invalid location" -- TODO: assert isLeft instead
 
   describe "A white pawn on a standard board at d2" $ do
     it "can move to either d3 or d4 if isolated" $ do
-      stdPossibleMoves [(teamWhite,"pd2")] "d2" `shouldBe` locs ["d3", "d4"]
+      stdPossibleMoves [(teamWhite,"pd2")] "d2" `shouldBe` Right (locs ["d3", "d4"])
      
     it "can move to only d3 if d4 is occupied by a teammate" $ do
-      stdPossibleMoves [(teamWhite,"pd2 pd4")] "d2" `shouldBe` locs ["d3"]
+      stdPossibleMoves [(teamWhite,"pd2 pd4")] "d2" `shouldBe` Right (locs ["d3"])
 
     it "can move to only d3 if d4 is occupied by an enemy" $ do
-      stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pd4")] "d2" `shouldBe` locs ["d3"]
+      stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pd4")] "d2" `shouldBe` Right (locs ["d3"])
 
     it "cannot move if d3 is occupied by a teammate" $ do
-      stdPossibleMoves [(teamWhite,"pd2 pd3")] "d2" `shouldBe` []
+      stdPossibleMoves [(teamWhite,"pd2 pd3")] "d2" `shouldBe` Right []
 
     it "cannot move if d3 is occupied by an enemy" $ do
-      stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pd3")] "d2" `shouldBe` []
+      stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pd3")] "d2" `shouldBe` Right []
 
   describe "A white pawn on a standard board at d3" $ do
     it "can move to only d4 if isolated" $ do 
-      stdPossibleMovesWithHistory [(teamWhite,"pd3")] [("d3",["d2"])] "d3" `shouldBe` locs ["d4"]
+      stdPossibleMovesWithHistory [(teamWhite,"pd3")] [("d3",["d2"])] "d3" `shouldBe` Right (locs ["d4"])
  
   describe "A black pawn on a standard board at d6" $ do
     it "can move to only d5 if isolated" $ do
-      stdPossibleMovesWithHistory [(teamBlack,"pd6")] [("d6",["d7"])] "d6" `shouldBe` locs ["d5"]
+      stdPossibleMovesWithHistory [(teamBlack,"pd6")] [("d6",["d7"])] "d6" `shouldBe` Right (locs ["d5"])
   
   describe "Some internal tests of helper functions" $ do
     it "should be able to inject a piece's history" $ do
@@ -97,10 +100,10 @@ spec = do
 
   describe "A super tiny board" $ do
     it "should not allow pawns moving off the edge if below absolute north" $ do
-      possibleMoves (newBoard 2 2 [(teamWhite,"pa1")]) (loc "a1") `shouldBe` locs ["a2"]
+      possibleMovesFromLocation (newBoard 2 2 [(teamWhite,"pa1")]) (loc "a1") `shouldBe` Right (locs ["a2"])
  
     it "should not allow pawns moving off the edge if at absolute north" $ do
-      possibleMoves (newBoard 2 2 [(teamWhite,"pa2")]) (loc "a2") `shouldBe` []
+      possibleMovesFromLocation (newBoard 2 2 [(teamWhite,"pa2")]) (loc "a2") `shouldBe` Right []
  
   where 
     boardSize (Board x _) = Map.size x
@@ -108,8 +111,8 @@ spec = do
     teamWhite = Team North "White"
     standardBoardPieceAt s = pieceAt (fromAlgebraicLocation s) (newStandardBoard teamWhite teamBlack)
     b8x8 ps = newBoard 8 8 ps
-    stdPossibleMoves ts al = possibleMoves (b8x8 ts) (fromAlgebraicLocation al)
-    stdPossibleMovesWithHistory ts hist al = possibleMoves (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al)
+    stdPossibleMoves ts al = possibleMovesFromLocation (b8x8 ts) (fromAlgebraicLocation al)
+    stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al)
 
 loc :: String -> Location
 loc = fromAlgebraicLocation

@@ -88,23 +88,21 @@ fromAlgebraicCharacterLocation (x:xs) =
   (fromAlgebraicCharacter x,fromAlgebraicLocation xs)
 
 
-pieceAt :: Location -> Board -> Square
+pieceAt :: Location -> Board -> Either String Square
 pieceAt (x,y) (Board m _) = 
   case Map.lookup (x,y) m of 
-    Nothing -> Nothing
-    Just Nothing -> Nothing
-    Just x -> x
+    Nothing -> Left "Invalid location"
+    Just x -> Right x
 
 
 ----------------------------
-possibleMoves :: Board -> Location -> [Location]
-possibleMoves b l =
-  let p = pieceAt l b
-  in 
-    if p == Nothing then 
-      error "No piece at this location" 
-    else 
-      possibleMovesByPiece b l (fromJust p) 
+possibleMovesFromLocation :: Board -> Location -> Either String [Location]
+possibleMovesFromLocation b l = possibleMoves b l (pieceAt l b)
+
+possibleMoves :: Board -> Location -> Either String Square -> Either String [Location]
+possibleMoves b l (Left err) = Left err 
+possibleMoves b l (Right (Just x)) = Right (possibleMovesByPiece b l x)
+possibleMoves b l (Right Nothing) = Left "Location is empty"
 
 relLoc :: Location -> Affinity -> (Int,Int) -> Location
 relLoc (x,y) North (r,f) = (x+r,y+f)
@@ -130,13 +128,13 @@ possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ (show p))
 
 
 filterUnoccupied :: Board -> [Location] -> [Location]
-filterUnoccupied b ls = filter (\x -> pieceAt x b == Nothing) ls
+filterUnoccupied b ls = filter (\x -> pieceAt x b == Right Nothing) ls
 
 -- Assumes head to tail is a single line of sight
 lineOfSightUnoccupied :: Board -> [Location] -> [Location]
 lineOfSightUnoccupied b [] = []
 lineOfSightUnoccupied b (l:ls) = 
-  if pieceAt l b == Nothing then 
+  if pieceAt l b == Right Nothing then 
     l:(lineOfSightUnoccupied b ls) 
   else 
     []
