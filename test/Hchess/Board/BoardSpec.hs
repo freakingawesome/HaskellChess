@@ -86,6 +86,12 @@ spec = do
     it "cannot move if d3 is occupied by an enemy" $ do
       stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pd3")] "d2" `shouldBe` Right []
 
+    it "can move forward diagonally if occupied by enemies" $ do
+      stdPossibleMoves [(teamWhite,"pd2"),(teamBlack,"pc3 pe3")] "d2" `shouldBe` Right (locs ["c3", "d3", "d4", "e3"])
+      
+    it "cannot move forward diagonally if occupied by teammates" $ do
+      stdPossibleMoves [(teamWhite,"pd2 pc3 pe3")] "d2" `shouldBe` Right (locs ["d3", "d4"])
+      
   describe "A white pawn on a standard board at d3" $ do
     it "can move to only d4 if isolated" $ do 
       stdPossibleMovesWithHistory [(teamWhite,"pd3")] [("d3",["d2"])] "d3" `shouldBe` Right (locs ["d4"])
