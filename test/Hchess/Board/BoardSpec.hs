@@ -92,10 +92,15 @@ spec = do
       stdPossibleMovesWithHistory [(teamBlack,"pd6")] [("d6",["d7"])] "d6" `shouldBe` locs ["d5"]
   
   describe "Some internal tests of helper functions" $ do
-		let a = 1
-		in
     it "should be able to inject a piece's history" $ do
       injectPieceHistory (Piece teamBlack Pawn []) ["a1","b2"] `shouldBe` Piece teamBlack Pawn (locs ["a1","b2"])
+
+  describe "A super tiny board" $ do
+    it "should not allow pawns moving off the edge if below absolute north" $ do
+      possibleMoves (newBoard 2 2 [(teamWhite,"pa1")]) (loc "a1") `shouldBe` locs ["a2"]
+ 
+    it "should not allow pawns moving off the edge if at absolute north" $ do
+      possibleMoves (newBoard 2 2 [(teamWhite,"pa2")]) (loc "a2") `shouldBe` []
  
   where 
     boardSize (Board x _) = Map.size x

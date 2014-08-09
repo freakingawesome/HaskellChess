@@ -92,6 +92,7 @@ pieceAt :: Location -> Board -> Square
 pieceAt (x,y) (Board m _) = 
   case Map.lookup (x,y) m of 
     Nothing -> Nothing
+    Just Nothing -> Nothing
     Just x -> x
 
 
@@ -114,7 +115,7 @@ relLoc (x,y) West (r,f) = (x-f,y+r)
 possibleMovesByPiece :: Board -> Location -> Piece -> [Location]
 
 -- Pawn
-possibleMovesByPiece (Board m capt) l (Piece (Team aff tname) Pawn ls) =
+possibleMovesByPiece (Board m capt) l (Piece (Team aff _) Pawn ls) =
   let 
     newpos = if ls == [] then 
       lineOfSightUnoccupied (Board m capt) [fwd 1,fwd 2] 
