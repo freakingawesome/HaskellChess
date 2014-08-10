@@ -1,12 +1,13 @@
 module Hchess.Moves where
 
 import Hchess.Board
-import Data.List(sort)
 
-possibleMovesFromLocation :: Board -> Location -> Either String [Location]
+data Move = Move (Location,Location) Board deriving (Show,Eq)
+
+possibleMovesFromLocation :: Board -> Location -> Either String [Move]
 possibleMovesFromLocation b l = possibleMoves b l (pieceAt l b)
 
-possibleMoves :: Board -> Location -> Either String Square -> Either String [Location]
+possibleMoves :: Board -> Location -> Either String Square -> Either String [Move]
 possibleMoves _ _ (Left err) = Left err 
 possibleMoves b l (Right (Just x)) = Right (possibleMovesByPiece b l x)
 possibleMoves _ _ (Right Nothing) = Left "Location is empty"
@@ -43,7 +44,7 @@ revr :: Location -> Affinity -> Int -> (Int,Int)
 revr l aff n = relLoc l aff (n,-n)
 
 -- List out all possible moves per piece
-possibleMovesByPiece :: Board -> Location -> Piece -> [Location]
+possibleMovesByPiece :: Board -> Location -> Piece -> [Move]
 
 -- Pawn
 possibleMovesByPiece (Board m capt) l (Piece (Team aff t) Pawn ls) =
@@ -53,7 +54,7 @@ possibleMovesByPiece (Board m capt) l (Piece (Team aff t) Pawn ls) =
     else 
       filterUnoccupied (Board m capt) [fwd' 1]
     diag = filterOccupiedByEnemy (Board m capt) (Team aff t) [fwdl' 1, fwdr' 1]
-  in sort (straight ++ diag)
+  in getMoves (Board m capt) l (straight ++ diag)
   where
     fwd'  = fwd l aff
     fwdl' = fwdl l aff
@@ -61,6 +62,14 @@ possibleMovesByPiece (Board m capt) l (Piece (Team aff t) Pawn ls) =
 
 -- One last catch-all for unknown pieces
 possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ (show p))
+
+getMoves :: Board -> Location -> [Location] -> [Move]
+getMoves _ _ [] = []
+getMoves b from (to:tos) = move b (from,to) : getMoves b from tos
+
+-- Performs an already vetted move.
+move :: Board -> (Location,Location) -> Move
+move (Board m capt) (from,to) = Move (from,to) (Board m capt)
 
 filterUnoccupied :: Board -> [Location] -> [Location]
 filterUnoccupied b ls = filter (\x -> pieceAt x b == Right Nothing) ls
