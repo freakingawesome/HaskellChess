@@ -21,11 +21,26 @@ relLoc (x,y) West (r,f) = (x-f,y+r)
 fwd :: Location -> Affinity -> Int -> (Int,Int)
 fwd l aff n = relLoc l aff (0,n)
 
-fl :: Location -> Affinity -> Int -> (Int,Int)
-fl l aff n = relLoc l aff (-1 * n,n)
+fwdl :: Location -> Affinity -> Int -> (Int,Int)
+fwdl l aff n = relLoc l aff (-n,n)
 
-fr :: Location -> Affinity -> Int -> (Int,Int)  
-fr l aff n = relLoc l aff (n,n)
+fwdr :: Location -> Affinity -> Int -> (Int,Int)  
+fwdr l aff n = relLoc l aff (n,n)
+
+rgt :: Location -> Affinity -> Int -> (Int,Int)  
+rgt l aff n = relLoc l aff (n,0)
+
+lft :: Location -> Affinity -> Int -> (Int,Int)
+lft l aff n = relLoc l aff (-n,0)
+
+rev :: Location -> Affinity -> Int -> (Int,Int)
+rev l aff n = relLoc l aff (0,-n)
+
+revl :: Location -> Affinity -> Int -> (Int,Int)
+revl l aff n = relLoc l aff (-n,-n)
+
+revr :: Location -> Affinity -> Int -> (Int,Int)  
+revr l aff n = relLoc l aff (n,-n)
 
 -- List out all possible moves per piece
 possibleMovesByPiece :: Board -> Location -> Piece -> [Location]
@@ -37,12 +52,12 @@ possibleMovesByPiece (Board m capt) l (Piece (Team aff t) Pawn ls) =
       lineOfSightUnoccupied (Board m capt) [fwd' 1,fwd' 2] 
     else 
       filterUnoccupied (Board m capt) [fwd' 1]
-    diag = filterOccupiedByEnemy (Board m capt) (Team aff t) [fl' 1, fr' 1]
+    diag = filterOccupiedByEnemy (Board m capt) (Team aff t) [fwdl' 1, fwdr' 1]
   in sort (straight ++ diag)
   where
-    fwd' = fwd l aff
-    fl'  = fl l aff
-    fr'  = fr l aff
+    fwd'  = fwd l aff
+    fwdl' = fwdl l aff
+    fwdr' = fwdr l aff
 
 -- One last catch-all for unknown pieces
 possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ (show p))
