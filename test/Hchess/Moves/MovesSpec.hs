@@ -59,9 +59,19 @@ spec = do
       it "should have no captures" $ do
         captured board' `shouldBe` Map.empty
 
-      it "should have no piece at d2" $ do
-        pieceAt (loc "d2") board' `shouldBe` Right Nothing
- 
+      --it "should have no piece at d2" $ do
+        --pieceAt (loc "d2") board' `shouldBe` Right Nothing
+  describe "Picking up the last piece on a board" $ do 
+    let 
+      b = b8x8 [(teamWhite,"pd2")]
+      (b',p') = pickUpPiece b (loc "d2")
+
+    it "should leave the board empty" $ do
+      Map.size (Map.filter (\x -> x /= Nothing) (getMap b')) `shouldBe` 0
+
+    it "should give me back my pawn with its last recorded location" $ do
+      p' `shouldBe` Piece teamWhite Pawn [loc "d2"]
+
   where 
     teamBlack = Team South "Black"
     teamWhite = Team North "White"
@@ -70,6 +80,7 @@ spec = do
     stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al)
     captured (Board _ capt) = capt
     getBoard (Move _ b) = b
+    getMap (Board m _) = m
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []

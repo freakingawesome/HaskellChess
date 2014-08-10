@@ -83,8 +83,9 @@ move (Board m capt) (from,to) = Move (from,to) board'
 pickUpPiece :: Board -> Location -> (Board,Piece)
 pickUpPiece (Board m capt) l = (Board (Map.update removePiece l m) capt, p)
   where
-    p = fromJust (fromRight (pieceAt l (Board m capt)))
+    p = recordLastLocation (fromJust (fromRight (pieceAt l (Board m capt))))
     removePiece _ = Nothing 
+    recordLastLocation (Piece t c ls) = Piece t c (ls ++ [l])
 
 filterUnoccupied :: Board -> [Location] -> [Location]
 filterUnoccupied b ls = filter (\x -> pieceAt x b == Right Nothing) ls
