@@ -67,10 +67,27 @@ spec = do
       (b',p') = pickUpPiece b (loc "d2")
 
     it "should leave the board empty" $ do
-      Map.size (Map.filter (\x -> x /= Nothing) (getMap b')) `shouldBe` 0
+      pieceCount b' `shouldBe` 0
 
     it "should give me back my pawn with its last recorded location" $ do
       p' `shouldBe` Piece teamWhite Pawn [loc "d2"]
+
+  describe "Picking up a piece from a new board" $ do 
+    let 
+      b = newStandardBoard teamWhite teamBlack
+      (b',p') = pickUpPiece b (loc "e1")
+
+    it "should leave the board with one fewer player" $ do
+      pieceCount b' `shouldBe` 31
+
+    it "just making sure the king existed on the original board" $ do
+      pieceAt (loc "e1") b `shouldBe` Right (Just (Piece teamWhite King []))
+
+    it "should leave the king spot empty" $ do
+      pieceAt (loc "e1") b' `shouldBe` Right Nothing
+
+    it "should give me back my king with its last recorded location" $ do
+      p' `shouldBe` Piece teamWhite King [loc "e1"]
 
   where 
     teamBlack = Team South "Black"
@@ -81,6 +98,7 @@ spec = do
     captured (Board _ capt) = capt
     getBoard (Move _ b) = b
     getMap (Board m _) = m
+    pieceCount b = Map.size (Map.filter (\x -> x /= Nothing) (getMap b)) 
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []

@@ -84,7 +84,7 @@ pickUpPiece :: Board -> Location -> (Board,Piece)
 pickUpPiece (Board m capt) l = (Board (Map.update removePiece l m) capt, p)
   where
     p = recordLastLocation (fromJust (fromRight (pieceAt l (Board m capt))))
-    removePiece _ = Nothing 
+    removePiece _ = Just Nothing 
     recordLastLocation (Piece t c ls) = Piece t c (ls ++ [l])
 
 filterUnoccupied :: Board -> [Location] -> [Location]
