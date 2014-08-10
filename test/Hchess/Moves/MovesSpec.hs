@@ -50,17 +50,24 @@ spec = do
       possibleMovesFromLocation (newBoard 2 2 [(teamWhite,"pa2")]) (loc "a2") `shouldBe` Right []
   
   describe "The board after a threatened pawn moves" $ do
-    let origBoard = b8x8 [(teamWhite,"pd2"),(teamBlack,"pe3")]
+    let b = b8x8 [(teamWhite,"pd2"),(teamBlack,"pe3")]
 
     describe "when a pawn moves without capturing" $ do
       let 
-        m = move origBoard (loc "d2",loc "d3")
-        board' = getBoard m
+        m = move b (loc "d2",loc "d3")
+        b' = getBoard m
       it "should have no captures" $ do
-        captured board' `shouldBe` Map.empty
+        captured b' `shouldBe` Map.empty
 
-      --it "should have no piece at d2" $ do
-        --pieceAt (loc "d2") board' `shouldBe` Right Nothing
+      it "should have no piece at d2" $ do
+        pieceAt (loc "d2") b' `shouldBe` Right Nothing
+
+    --describe "when a pawn moves to capture" $ do
+      --let
+        --m = move b (loc "d2",loc "e3")
+      --it "should have one capture" $ do
+        --Map.lookup teamWhite 
+
   describe "Picking up the last piece on a board" $ do 
     let 
       b = b8x8 [(teamWhite,"pd2")]
