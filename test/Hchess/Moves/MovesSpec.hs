@@ -48,6 +48,19 @@ spec = do
  
     it "should not allow pawns moving off the edge if at absolute north" $ do
       possibleMovesFromLocation (newBoard 2 2 [(teamWhite,"pa2")]) (loc "a2") `shouldBe` Right []
+  
+  describe "The board after a threatened pawn moves" $ do
+    let origBoard = b8x8 [(teamWhite,"pd2"),(teamBlack,"pe3")]
+
+    describe "when a pawn moves without capturing" $ do
+      let 
+        m = move origBoard (loc "d2",loc "d3")
+        board' = getBoard m
+      it "should have no captures" $ do
+        captured board' `shouldBe` Map.empty
+
+      it "should have no piece at d2" $ do
+        pieceAt (loc "d2") board' `shouldBe` Right Nothing
  
   where 
     teamBlack = Team South "Black"
@@ -55,6 +68,8 @@ spec = do
     b8x8 ps = newBoard 8 8 ps
     stdPossibleMoves ts al = possibleMovesFromLocation (b8x8 ts) (fromAlgebraicLocation al)
     stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al)
+    captured (Board _ capt) = capt
+    getBoard (Move _ b) = b
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []
