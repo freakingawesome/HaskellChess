@@ -4,6 +4,7 @@ import SpecHelper
 import qualified Data.Map as Map
 import Data.Maybe(fromJust)
 import Data.List(sort)
+import Data.Either.Unwrap
 
 spec :: Spec
 spec = do
@@ -62,11 +63,19 @@ spec = do
       it "should have no piece at d2" $ do
         pieceAt (loc "d2") b' `shouldBe` Right Nothing
 
-    --describe "when a pawn moves to capture" $ do
-      --let
-        --m = move b (loc "d2",loc "e3")
-      --it "should have one capture" $ do
-        --Map.lookup teamWhite 
+    describe "when a pawn moves to capture" $ do
+      let
+        m = move b (loc "d2",loc "e3")
+        b' = getBoard m
+
+      it "make sure the original board has no captures" $ do
+        Map.lookup teamWhite (getCaptures b) `shouldBe` Nothing
+
+      it "should have one capture" $ do
+        Map.lookup teamWhite (getCaptures b') `shouldBe` Just ([Piece teamBlack Pawn [loc "e3"]])
+
+      it "should move the original piece to the target location" $ do
+        fromRight (pieceAt (loc "e3") b') `shouldBe` Just (Piece teamWhite Pawn [loc "d2"])
 
   describe "Picking up the last piece on a board" $ do 
     let 
@@ -77,7 +86,7 @@ spec = do
       pieceCount b' `shouldBe` 0
 
     it "should give me back my pawn with its last recorded location" $ do
-      p' `shouldBe` Piece teamWhite Pawn [loc "d2"]
+      p' `shouldBe` Just (Piece teamWhite Pawn [loc "d2"])
 
   describe "Picking up a piece from a new board" $ do 
     let 
@@ -94,7 +103,30 @@ spec = do
       pieceAt (loc "e1") b' `shouldBe` Right Nothing
 
     it "should give me back my king with its last recorded location" $ do
-      p' `shouldBe` Piece teamWhite King [loc "e1"]
+      p' `shouldBe` Just (Piece teamWhite King [loc "e1"])
+
+  describe "Trying to pick up a piece from an empty square" $ do
+    let
+      b = newStandardBoard teamWhite teamBlack
+    it "should give me the same board and no piece" $ do
+      pickUpPiece b (loc "e3") `shouldBe` (b,Nothing)
+
+  describe "Recording a capture" $ do
+    let 
+      b = b8x8 [(teamWhite,"pd2"),(teamBlack,"pe3 pc3")]
+      b' = recordCapture b teamWhite (fromRight (pieceAt (loc "e3") b))
+
+    it "should return the same board if no piece is captured" $ do
+      recordCapture b teamWhite Nothing `shouldBe` b
+
+    it "should add a team if it doesn't exist" $ do
+      Map.toList (getCaptures b') `shouldBe` [(teamWhite,[Piece teamBlack Pawn []])]
+
+    it "should append to an existing team's list of captured pieces" $ do
+      let
+        b'' = recordCapture b' teamWhite (fromRight (pieceAt (loc "c3") b'))
+        blackPawn = Piece teamBlack Pawn []
+      Map.toList (getCaptures b'') `shouldBe` [(teamWhite,[blackPawn,blackPawn])]
 
   where 
     teamBlack = Team South "Black"
@@ -106,6 +138,7 @@ spec = do
     getBoard (Move _ b) = b
     getMap (Board m _) = m
     pieceCount b = Map.size (Map.filter (\x -> x /= Nothing) (getMap b)) 
+    getCaptures (Board _ capt) = capt
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []

@@ -15,7 +15,7 @@ data Affinity =
 
 data Team = 
   Team Affinity String 
-  deriving (Show,Eq)
+  deriving (Show,Eq,Ord)
 
 type Location = (Int,Int)
 
@@ -92,4 +92,7 @@ pieceAt (x,y) (Board m _) =
   case Map.lookup (x,y) m of 
     Nothing -> Left "Invalid location"
     Just a -> Right a
+
+getTeam :: Piece -> Team
+getTeam (Piece t _ _) = t
 

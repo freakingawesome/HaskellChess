@@ -3,7 +3,6 @@ module Hchess.Moves where
 import Hchess.Board
 import qualified Data.Map as Map
 import Data.Maybe(fromJust)
---import Data.Either(fromRight)
 import Data.Either.Unwrap
 data Move = Move (Location,Location) Board deriving (Show,Eq)
 
@@ -72,20 +71,24 @@ getMoves b from (to:tos) = move b (from,to) : getMoves b from tos
 
 -- Performs an already vetted move.
 move :: Board -> (Location,Location) -> Move
-move (Board m capt) (from,to) = Move (from,to) board' 
+move (Board m capt) (from,to) = Move (from,to) b''''
   where
-    pickedUp = pickUpPiece (Board m capt) from
-    board' = fst pickedUp
-    --eitherPiece = pieceAt from (Board m capt)
-    --updatedMap = do
-      --Map.update placePiece 
+    (b',Just mover) = pickUpPiece (Board m capt) from
+    (b'',dead) = pickUpPiece b' to 
+    b''' = recordCapture b'' (getTeam mover) dead
+    b'''' = placePiece b''' to mover 
 
-pickUpPiece :: Board -> Location -> (Board,Piece)
-pickUpPiece (Board m capt) l = (Board (Map.update removePiece l m) capt, p)
+pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
+pickUpPiece (Board m capt) l = (Board (Map.update removePiece l m) capt, p')
   where
-    p = recordLastLocation (fromJust (fromRight (pieceAt l (Board m capt))))
+    p = fromRight (pieceAt l (Board m capt))
     removePiece _ = Just Nothing 
     recordLastLocation (Piece t c ls) = Piece t c (ls ++ [l])
+    p' = 
+      if p == Nothing then 
+        Nothing 
+      else 
+        Just (recordLastLocation (fromJust p))
 
 filterUnoccupied :: Board -> [Location] -> [Location]
 filterUnoccupied b ls = filter (\x -> pieceAt x b == Right Nothing) ls
@@ -106,6 +109,14 @@ lineOfSightUnoccupied b (l:ls) =
   else 
     []
 
-
+-- Places the piece on the end of the board's captured list
+recordCapture :: Board -> Team -> Maybe Piece -> Board
+recordCapture b _ Nothing = b
+recordCapture (Board m capt) t (Just p)
+  | existingTeam == Nothing = Board m (Map.fromList [(t,[p])])
+  | otherwise = Board m (Map.update appendPiece t capt)
+  where 
+    existingTeam = Map.lookup t capt
+    appendPiece capts = Just (capts ++ [p])
 
 
