@@ -63,9 +63,6 @@ spec = do
       it "should have no piece at d2" $ do
         pieceAt (loc "d2") b' `shouldBe` Right Nothing
 
-      it "the new board should have the original board in its history" $ do
-        getBoardHistory b' `shouldBe` [b]
-
     describe "when a pawn moves to capture" $ do
       let
         m = move b (loc "d2",loc "e3")
@@ -125,11 +122,17 @@ spec = do
     it "should add a team if it doesn't exist" $ do
       Map.toList (getCaptures b') `shouldBe` [(teamWhite,[Piece teamBlack Pawn []])]
 
+    it "the new board should have the original board in its history" $ do
+      getBoardHistory b' `shouldBe` [b]
+
     it "should append to an existing team's list of captured pieces" $ do
       let
         b'' = recordCapture b' teamWhite (fromRight (pieceAt (loc "c3") b'))
         blackPawn = Piece teamBlack Pawn []
       Map.toList (getCaptures b'') `shouldBe` [(teamWhite,[blackPawn,blackPawn])]
+
+      --it "the second new board should have the original and first boards in its history" $ do
+        --getBoardHistory b'' `shouldBe` [b,b']
 
   describe "En passant" $ do
     describe "on a board where black can perform en passant" $ do

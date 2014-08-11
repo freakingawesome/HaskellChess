@@ -76,7 +76,7 @@ move (Board m capt bs) (from,to) = Move (from,to) b''''
     (b',Just mover) = pickUpPiece (Board m capt bs) from
     (b'',dead) = pickUpPiece b' to 
     b''' = recordCapture b'' (getTeam mover) dead
-    b'''' = placePiece b''' to mover 
+    b'''' = recordLastBoard (placePiece b''' to mover) (Board m capt bs)
 
 pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
 pickUpPiece (Board m capt bs) l = (Board (Map.update removePiece l m) capt bs, p')
@@ -119,4 +119,6 @@ recordCapture (Board m capt bs) t (Just p)
     existingTeam = Map.lookup t capt
     appendPiece capts = Just (capts ++ [p])
 
+recordLastBoard :: Board -> Board -> Board
+recordLastBoard (Board m capt bs) old = Board m capt (bs ++ [old])
 
