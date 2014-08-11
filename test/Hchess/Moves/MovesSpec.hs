@@ -128,6 +128,17 @@ spec = do
         blackPawn = Piece teamBlack Pawn []
       Map.toList (getCaptures b'') `shouldBe` [(teamWhite,[blackPawn,blackPawn])]
 
+  describe "En passant" $ do
+    describe "on a board where black can perform en passant" $ do
+      let
+        b = newStandardBoard teamWhite teamBlack
+        Move (_,_) b' = move b (loc "b7",loc "b4")
+        Move (_,_) b'' = move b' (loc "a2",loc "a4")
+        pm = possibleMovesFromLocation b'' (loc "b4") 
+
+      it "should allow en passant from black at b4" $ do
+        getTargetLocationsFromMoves pm `shouldContain` [loc "a3"]
+
   where 
     teamBlack = Team South "Black"
     teamWhite = Team North "White"
@@ -139,6 +150,9 @@ spec = do
     getMap (Board m _) = m
     pieceCount b = Map.size (Map.filter (\x -> x /= Nothing) (getMap b)) 
     getCaptures (Board _ capt) = capt
+    getTargetLocationsFromMoves (Right []) = []
+    getTargetLocationsFromMoves (Left _) = []
+    getTargetLocationsFromMoves (Right (Move (_,to) _:ls)) = to : getTargetLocationsFromMoves (Right ls)
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []
