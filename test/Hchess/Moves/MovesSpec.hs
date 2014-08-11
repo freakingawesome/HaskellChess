@@ -63,6 +63,9 @@ spec = do
       it "should have no piece at d2" $ do
         pieceAt (loc "d2") b' `shouldBe` Right Nothing
 
+      it "the new board should have the original board in its history" $ do
+        getBoardHistory b' `shouldBe` [b]
+
     describe "when a pawn moves to capture" $ do
       let
         m = move b (loc "d2",loc "e3")
@@ -139,20 +142,23 @@ spec = do
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "a3"]
 
+    -- do the moves in reverse (white first) to make sure it can only be performed in the correct order
+
   where 
     teamBlack = Team South "Black"
     teamWhite = Team North "White"
     b8x8 ps = newBoard 8 8 ps
     stdPossibleMoves ts al = possibleMovesFromLocation (b8x8 ts) (fromAlgebraicLocation al)
     stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al)
-    captured (Board _ capt) = capt
+    captured (Board _ capt _) = capt
     getBoard (Move _ b) = b
-    getMap (Board m _) = m
+    getMap (Board m _ _) = m
     pieceCount b = Map.size (Map.filter (\x -> x /= Nothing) (getMap b)) 
-    getCaptures (Board _ capt) = capt
+    getCaptures (Board _ capt _) = capt
     getTargetLocationsFromMoves (Right []) = []
     getTargetLocationsFromMoves (Left _) = []
     getTargetLocationsFromMoves (Right (Move (_,to) _:ls)) = to : getTargetLocationsFromMoves (Right ls)
+    getBoardHistory (Board _ _ hist) = hist
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []
@@ -168,9 +174,9 @@ locs (x:xs) = loc x : locs xs
 
 injectBoardHistory :: Board -> [(String,[String])] -> Board
 injectBoardHistory b [] = b
-injectBoardHistory (Board m capt) ((al,hist):hs) = 
+injectBoardHistory (Board m capt bs) ((al,hist):hs) = 
   let updateOrFail p = if p == Nothing then error "Invalid location" else Just (Just (injectPieceHistory (fromJust p) hist))
-  in injectBoardHistory (Board (Map.update updateOrFail (loc al) m) capt) hs 
+  in injectBoardHistory (Board (Map.update updateOrFail (loc al) m) capt bs) hs 
 
 injectPieceHistory :: Piece -> [String] -> Piece
 injectPieceHistory (Piece t c _) hs = Piece t c (locs hs)

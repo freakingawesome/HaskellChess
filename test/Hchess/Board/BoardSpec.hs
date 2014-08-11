@@ -70,7 +70,7 @@ spec = do
       standardBoardPieceAt "z9" `shouldBe` Left "Invalid location" -- TODO: assert isLeft instead
  
   where 
-    boardSize (Board x _) = Map.size x
+    boardSize (Board x _ _) = Map.size x
     teamBlack = Team South "Black"
     teamWhite = Team North "White"
     standardBoardPieceAt s = pieceAt (fromAlgebraicLocation s) (newStandardBoard teamWhite teamBlack)

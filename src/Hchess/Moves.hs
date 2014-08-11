@@ -49,14 +49,14 @@ revr l aff n = relLoc l aff (n,-n)
 possibleMovesByPiece :: Board -> Location -> Piece -> [Move]
 
 -- Pawn
-possibleMovesByPiece (Board m capt) l (Piece (Team aff t) Pawn ls) =
+possibleMovesByPiece (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
   let 
     straight = if ls == [] then 
-      lineOfSightUnoccupied (Board m capt) [fwd' 1,fwd' 2] 
+      lineOfSightUnoccupied (Board m capt bs) [fwd' 1,fwd' 2] 
     else 
-      filterUnoccupied (Board m capt) [fwd' 1]
-    diag = filterOccupiedByEnemy (Board m capt) (Team aff t) [fwdl' 1, fwdr' 1]
-  in getMoves (Board m capt) l (straight ++ diag)
+      filterUnoccupied (Board m capt bs) [fwd' 1]
+    diag = filterOccupiedByEnemy (Board m capt bs) (Team aff t) [fwdl' 1, fwdr' 1]
+  in getMoves (Board m capt bs) l (straight ++ diag)
   where
     fwd'  = fwd l aff
     fwdl' = fwdl l aff
@@ -71,17 +71,17 @@ getMoves b from (to:tos) = move b (from,to) : getMoves b from tos
 
 -- Performs an already vetted move.
 move :: Board -> (Location,Location) -> Move
-move (Board m capt) (from,to) = Move (from,to) b''''
+move (Board m capt bs) (from,to) = Move (from,to) b''''
   where
-    (b',Just mover) = pickUpPiece (Board m capt) from
+    (b',Just mover) = pickUpPiece (Board m capt bs) from
     (b'',dead) = pickUpPiece b' to 
     b''' = recordCapture b'' (getTeam mover) dead
     b'''' = placePiece b''' to mover 
 
 pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
-pickUpPiece (Board m capt) l = (Board (Map.update removePiece l m) capt, p')
+pickUpPiece (Board m capt bs) l = (Board (Map.update removePiece l m) capt bs, p')
   where
-    p = fromRight (pieceAt l (Board m capt))
+    p = fromRight (pieceAt l (Board m capt bs))
     removePiece _ = Just Nothing 
     recordLastLocation (Piece t c ls) = Piece t c (ls ++ [l])
     p' = 
@@ -112,9 +112,9 @@ lineOfSightUnoccupied b (l:ls) =
 -- Places the piece on the end of the board's captured list
 recordCapture :: Board -> Team -> Maybe Piece -> Board
 recordCapture b _ Nothing = b
-recordCapture (Board m capt) t (Just p)
-  | existingTeam == Nothing = Board m (Map.fromList [(t,[p])])
-  | otherwise = Board m (Map.update appendPiece t capt)
+recordCapture (Board m capt bs) t (Just p)
+  | existingTeam == Nothing = Board m (Map.fromList [(t,[p])]) bs
+  | otherwise = Board m (Map.update appendPiece t capt) bs
   where 
     existingTeam = Map.lookup t capt
     appendPiece capts = Just (capts ++ [p])
