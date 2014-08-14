@@ -77,6 +77,9 @@ spec = do
       it "should move the original piece to the target location" $ do
         fromRight (pieceAt (loc "e3") b') `shouldBe` Just (Piece teamWhite Pawn [loc "d2"])
 
+      it "the new board should have the original board in its history" $ do
+        getBoardHistory b' `shouldBe` [b]
+
   describe "Picking up the last piece on a board" $ do 
     let 
       b = b8x8 [(teamWhite,"pd2")]
@@ -121,9 +124,6 @@ spec = do
 
     it "should add a team if it doesn't exist" $ do
       Map.toList (getCaptures b') `shouldBe` [(teamWhite,[Piece teamBlack Pawn []])]
-
-    it "the new board should have the original board in its history" $ do
-      getBoardHistory b' `shouldBe` [b]
 
     it "should append to an existing team's list of captured pieces" $ do
       let
