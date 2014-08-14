@@ -132,12 +132,13 @@ spec = do
       Map.toList (getCaptures b'') `shouldBe` [(teamWhite,[blackPawn,blackPawn])]
 
   describe "En passant" $ do
-    describe "on a board where black can perform en passant" $ do
+    describe "on a board where black can perform en passant on the right" $ do
       let
         b = newStandardBoard teamWhite teamBlack
         Move (_,_) b' = move b (loc "b7",loc "b4") -- not a legal move, I'm cheating for now
         Move (_,_) b'' = move b' (loc "a2",loc "a4")
         pm = possibleMovesFromLocation b'' (loc "b4") 
+        possibleBoard = getBoardFromPossibleMoves (loc "a3") pm
 
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "a3"]
@@ -145,7 +146,16 @@ spec = do
       it "the second new board should have the original and first boards in its history" $ do
         getBoardHistory b'' `shouldBe` [b,b']
 
-    -- test en passant on the left-hand side
+    describe "on a board where black can perform en passant on the left" $ do
+      let
+        b = newStandardBoard teamWhite teamBlack
+        Move (_,_) b' = move b (loc "b7",loc "b4") -- not a legal move, I'm cheating for now
+        Move (_,_) b'' = move b' (loc "c2",loc "c4")
+        pm = possibleMovesFromLocation b'' (loc "b4") 
+
+      it "should allow en passant from black at b4" $ do
+        getTargetLocationsFromMoves pm `shouldContain` [loc "c3"]
+
     -- test to make sure en passant isn't valid if the opportunity is missed
     -- check the resulting board returned in the possible move
     -- do the moves in reverse (white first) to make sure it can only be performed in the correct order
@@ -165,6 +175,9 @@ spec = do
     getTargetLocationsFromMoves (Left _) = []
     getTargetLocationsFromMoves (Right (Move (_,to) _:ls)) = to : getTargetLocationsFromMoves (Right ls)
     getBoardHistory (Board _ _ hist) = hist
+    --getBoardFromPossibleMove l [] = Nothing
+    --getBoardFromPossibleMove l (Right (Move (_,to) _:ls))
+    getBoardFromPossibleMoves l (Right mvs) = getBoard (head (filter (\((from,to) b) -> to == l)))
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []
