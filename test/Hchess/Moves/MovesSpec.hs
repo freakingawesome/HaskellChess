@@ -131,19 +131,19 @@ spec = do
         blackPawn = Piece teamBlack Pawn []
       Map.toList (getCaptures b'') `shouldBe` [(teamWhite,[blackPawn,blackPawn])]
 
-      --it "the second new board should have the original and first boards in its history" $ do
-        --getBoardHistory b'' `shouldBe` [b,b']
-
   describe "En passant" $ do
     describe "on a board where black can perform en passant" $ do
       let
         b = newStandardBoard teamWhite teamBlack
-        Move (_,_) b' = move b (loc "b7",loc "b4")
+        Move (_,_) b' = move b (loc "b7",loc "b4") -- not a legal move, I'm cheating for now
         Move (_,_) b'' = move b' (loc "a2",loc "a4")
         pm = possibleMovesFromLocation b'' (loc "b4") 
 
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "a3"]
+
+      it "the second new board should have the original and first boards in its history" $ do
+        getBoardHistory b'' `shouldBe` [b,b']
 
     -- do the moves in reverse (white first) to make sure it can only be performed in the correct order
 
