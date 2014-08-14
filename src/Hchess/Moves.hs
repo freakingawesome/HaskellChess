@@ -52,26 +52,17 @@ possibleMovesByPiece :: Board -> Location -> Piece -> [Move]
 possibleMovesByPiece (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
   let 
     b = Board m capt bs
-    lastb = last bs
+    p = Piece (Team aff t) Pawn ls
     straight = if ls == [] then 
       lineOfSightUnoccupied b [fwd' 1,fwd' 2] 
     else 
       filterUnoccupied b [fwd' 1]
     diag = filterOccupiedByEnemy b (Team aff t) [fwdl' 1, fwdr' 1]
-    enpassr = if fwdr' 1 `notElem` diag && isEnemyPawn (pieceAt (rgt' 1) b) && isEmpty (pieceAt (fwdr' 1) b) && isEmpty (pieceAt ffr b) && isEnemyPawn (pieceAt ffr lastb) && isEmpty (pieceAt (fwdr' 1) lastb) && isEmpty (pieceAt (rgt' 1) lastb) then [fwdr' 1] else []
-      
-  in getMoves b l (straight ++ diag ++ enpassr)
+  in getMoves b l (straight ++ diag ++ (getEnPassantTargetLocations b l p))
   where
     fwd' = fwd l aff
     fwdl' = fwdl l aff
     fwdr' = fwdr l aff
-    rgt' = rgt l aff
-    lft' = lft l aff
-    ffr = relLoc l aff (1,2)
-    isEnemyPawn (Right (Just (Piece otherTeam Pawn _))) = otherTeam /= (Team aff t)
-    isEnemyPawn _ = False
-    isEmpty (Right Nothing) = True
-    isEmpty _ = False
 
 -- One last catch-all for unknown pieces
 possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ (show p))
@@ -132,4 +123,28 @@ recordCapture (Board m capt bs) t (Just p)
 
 recordLastBoard :: Board -> Board -> Board
 recordLastBoard (Board m capt bs) old = Board m capt (bs ++ [old])
+
+-- assumes the location you send in is a pawn, this will return the forward left/right positions
+-- if en passant is possible for either side.
+getEnPassantTargetLocations :: Board -> Location -> Piece -> [Location]
+getEnPassantTargetLocations (Board _ _ []) _ _ = []
+getEnPassantTargetLocations (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
+  ep [rgt' 1,fwdr' 1,ffr] ++ ep [lft' 1,fwdl' 1,ffl]
+  where
+    fwd' = fwd l aff
+    fwdl' = fwdl l aff
+    fwdr' = fwdr l aff
+    rgt' = rgt l aff
+    lft' = lft l aff
+    ffr = relLoc l aff (1,2)
+    ffl = relLoc l aff (-1,2)
+    isEnemyPawn (Right (Just (Piece otherTeam Pawn _))) = otherTeam /= (Team aff t)
+    isEnemyPawn _ = False
+    isEmpty (Right Nothing) = True
+    isEmpty _ = False
+    b = Board m capt bs
+    lastb = last bs
+    ep locs = if isEnemyPawn (pieceAt (locs!!0) b) && isEmpty (pieceAt (locs!!1) b) && isEmpty (pieceAt (locs!!2) b) && isEnemyPawn (pieceAt (locs!!2) lastb) && isEmpty (pieceAt (locs!!1) lastb) && isEmpty (pieceAt (locs!!1) lastb) then [locs!!1] else []
+
+getEnPassantTargetLocations _ _ _ = []
 

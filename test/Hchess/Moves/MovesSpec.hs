@@ -145,6 +145,9 @@ spec = do
       it "the second new board should have the original and first boards in its history" $ do
         getBoardHistory b'' `shouldBe` [b,b']
 
+    -- test en passant on the left-hand side
+    -- test to make sure en passant isn't valid if the opportunity is missed
+    -- check the resulting board returned in the possible move
     -- do the moves in reverse (white first) to make sure it can only be performed in the correct order
 
   where 
