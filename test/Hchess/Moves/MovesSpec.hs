@@ -138,13 +138,22 @@ spec = do
         Move (_,_) b' = move b (loc "b7",loc "b4") -- not a legal move, I'm cheating for now
         Move (_,_) b'' = move b' (loc "a2",loc "a4")
         pm = possibleMovesFromLocation b'' (loc "b4") 
-        possibleBoard = getBoardFromPossibleMoves (loc "a3") pm
 
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "a3"]
 
       it "the second new board should have the original and first boards in its history" $ do
         getBoardHistory b'' `shouldBe` [b,b']
+
+      describe "the resulting board" $ do
+        let
+          possibleBoard = getBoard (head (filter (\(Move m b) -> m == (loc "b4",loc "a3")) (fromRight pm)))
+      
+        it "should be missing the captured piece" $ do
+          pieceAt (loc "a4") possibleBoard `shouldBe` Right Nothing
+
+        it "should have the missing pawn in the captured list" $ do
+          captured possibleBoard `shouldBe` Map.fromList [(teamBlack,[Piece teamWhite Pawn [loc "a2",loc "a4"]])]
 
     describe "on a board where black can perform en passant on the left" $ do
       let
@@ -175,9 +184,12 @@ spec = do
     getTargetLocationsFromMoves (Left _) = []
     getTargetLocationsFromMoves (Right (Move (_,to) _:ls)) = to : getTargetLocationsFromMoves (Right ls)
     getBoardHistory (Board _ _ hist) = hist
+
     --getBoardFromPossibleMove l [] = Nothing
-    --getBoardFromPossibleMove l (Right (Move (_,to) _:ls))
-    getBoardFromPossibleMoves l (Right mvs) = getBoard (head (filter (\((from,to) b) -> to == l)))
+    --getBoardFromPossibleMove l (Right (Move (_,to) _:ls)))
+    --getBoardFromPossibleMoves l (Right mvs) = Just (getBoard (head (filter (foo l) mvs)))
+    --getBoardFromPossibleMoves _ (Left _) = Nothing
+    --foo l (from,to) = to == l
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []

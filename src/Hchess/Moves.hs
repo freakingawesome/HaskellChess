@@ -76,9 +76,21 @@ move :: Board -> (Location,Location) -> Move
 move (Board m capt bs) (from,to) = Move (from,to) b''''
   where
     (b',Just mover) = pickUpPiece (Board m capt bs) from
-    (b'',dead) = pickUpPiece b' to 
+    moverChar (Piece _ c _) = c
+    moverAff (Piece (Team aff _) _ _) = aff
+    moverTeam (Piece t _ _) = t
+    (b'',dead) = 
+      if isEnPassantCapture then 
+        pickUpPiece b' (relLoc to (moverAff mover) (0,-1))
+      else
+        pickUpPiece b' to 
     b''' = recordCapture b'' (getTeam mover) dead
     b'''' = recordLastBoard (placePiece b''' to mover) (Board m capt bs)
+    isEnPassantCapture = 
+      moverChar mover == Pawn 
+      && (to == (relLoc from (moverAff mover) (1,1)))
+      && isEmpty (pieceAt to b')
+      && isEnemyPawn (pieceAt (relLoc to (moverAff mover) (0,-1)) b') (moverTeam mover) 
 
 pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
 pickUpPiece (Board m capt bs) l = (Board (Map.update removePiece l m) capt bs, p')
@@ -138,13 +150,17 @@ getEnPassantTargetLocations (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
     lft' = lft l aff
     ffr = relLoc l aff (1,2)
     ffl = relLoc l aff (-1,2)
-    isEnemyPawn (Right (Just (Piece otherTeam Pawn _))) = otherTeam /= (Team aff t)
-    isEnemyPawn _ = False
-    isEmpty (Right Nothing) = True
-    isEmpty _ = False
     b = Board m capt bs
     lastb = last bs
-    ep locs = if isEnemyPawn (pieceAt (locs!!0) b) && isEmpty (pieceAt (locs!!1) b) && isEmpty (pieceAt (locs!!2) b) && isEnemyPawn (pieceAt (locs!!2) lastb) && isEmpty (pieceAt (locs!!1) lastb) && isEmpty (pieceAt (locs!!1) lastb) then [locs!!1] else []
+    ep locs = if isEnemyPawn (pieceAt (locs!!0) b) (Team aff t) && isEmpty (pieceAt (locs!!1) b) && isEmpty (pieceAt (locs!!2) b) && isEnemyPawn (pieceAt (locs!!2) lastb) (Team aff t) && isEmpty (pieceAt (locs!!1) lastb) && isEmpty (pieceAt (locs!!1) lastb) then [locs!!1] else []
 
 getEnPassantTargetLocations _ _ _ = []
+
+isEnemyPawn :: Either String Square -> Team -> Bool
+isEnemyPawn (Right (Just (Piece otherTeam Pawn _))) t = otherTeam /= t
+isEnemyPawn _ _ = False
+
+isEmpty :: Either String Square -> Bool
+isEmpty (Right Nothing) = True
+isEmpty _ = False
 
