@@ -189,6 +189,28 @@ spec = do
       it "should not allow en passant from black at b4" $ do
         loc "a3" `elem` getTargetLocationsFromMoves pm `shouldBe` False
 
+  describe "A rook" $ do
+
+    it "can move in straight lines" $ do 
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Rd4")] "d4")) `shouldBe` sort [
+          "d5","d6","d7","d8",
+          "e4","f4","g4","h4",
+          "d3","d2","d1",
+          "c4","b4","a4"]
+
+    it "can move in straight lines up to and including capture" $ do 
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Rd4"),(teamBlack,"pd7 pg4 pd2 pc4")] "d4")) `shouldBe` sort [
+          "d5","d6","d7",
+          "e4","f4","g4",
+          "d3","d2",
+          "c4"]
+
+    it "cannot budge teammates" $ do 
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Rd4 pd7 pg4 pd2 pc4")] "d4")) `shouldBe` sort [
+          "d5","d6",
+          "e4","f4",
+          "d3"]
+
   where 
     teamBlack = Team South "Black"
     teamWhite = Team North "White"

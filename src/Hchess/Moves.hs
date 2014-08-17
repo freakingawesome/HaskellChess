@@ -67,6 +67,14 @@ possibleMovesByPiece (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
     diag = filterOccupiedByEnemy b (Team aff t) [fwdl l aff 1, fwdr l aff 1]
   in getMoves b l (straight ++ diag ++ getEnPassantTargetLocations b l p)
 
+-- Rook
+possibleMovesByPiece b l (Piece t Rook _) =
+  getMoves b l (
+    lineOfSightMaybeCapture b t l (0,1)
+    ++ lineOfSightMaybeCapture b t l (1,0)
+    ++ lineOfSightMaybeCapture b t l (0,-1)
+    ++ lineOfSightMaybeCapture b t l (-1,0))
+
 -- One last catch-all for unknown pieces
 possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ show p)
 
@@ -126,6 +134,16 @@ lineOfSightUnoccupied b (l:ls) =
     l:lineOfSightUnoccupied b ls
   else 
     []
+
+-- Walks in a direction until it goes off the board or lands on an enemy
+lineOfSightMaybeCapture :: Board -> Team -> Location -> (Int,Int) -> [Location]
+lineOfSightMaybeCapture b (Team aff t) l (r,f)
+  | p == Right Nothing = targetLoc : lineOfSightMaybeCapture b (Team aff t) targetLoc (r,f)
+  | isEnemy (Team aff t) p = [targetLoc]
+  | otherwise = []
+  where 
+    targetLoc = relLoc l aff (r,f)
+    p = pieceAt targetLoc b
 
 -- Places the piece on the end of the board's captured list
 recordCapture :: Board -> Team -> Maybe Piece -> Board
