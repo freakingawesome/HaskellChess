@@ -46,6 +46,12 @@ revl l aff n = relLoc l aff (-n,-n)
 revr :: Location -> Affinity -> Int -> (Int,Int)  
 revr l aff n = relLoc l aff (n,-n)
 
+ffr :: Location -> Affinity -> (Int,Int)
+ffr l aff = relLoc l aff (1,2)
+
+ffl :: Location -> Affinity -> (Int,Int)
+ffl l aff = relLoc l aff (-1,2)
+
 -- List out all possible moves per piece
 possibleMovesByPiece :: Board -> Location -> Piece -> [Move]
 
@@ -55,15 +61,11 @@ possibleMovesByPiece (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
     b = Board m capt bs
     p = Piece (Team aff t) Pawn ls
     straight = if null ls then 
-      lineOfSightUnoccupied b [fwd' 1,fwd' 2] 
+      lineOfSightUnoccupied b [fwd l aff 1,fwd l aff 2] 
     else 
-      filterUnoccupied b [fwd' 1]
-    diag = filterOccupiedByEnemy b (Team aff t) [fwdl' 1, fwdr' 1]
+      filterUnoccupied b [fwd l aff 1]
+    diag = filterOccupiedByEnemy b (Team aff t) [fwdl l aff 1, fwdr l aff 1]
   in getMoves b l (straight ++ diag ++ getEnPassantTargetLocations b l p)
-  where
-    fwd' = fwd l aff
-    fwdl' = fwdl l aff
-    fwdr' = fwdr l aff
 
 -- One last catch-all for unknown pieces
 possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ show p)
@@ -143,15 +145,8 @@ recordLastBoard (Board m capt bs) old = Board m capt (bs ++ [old])
 getEnPassantTargetLocations :: Board -> Location -> Piece -> [Location]
 getEnPassantTargetLocations (Board _ _ []) _ _ = []
 getEnPassantTargetLocations (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
-  ep [rgt' 1,fwdr' 1,ffr] ++ ep [lft' 1,fwdl' 1,ffl]
+  ep [rgt l aff 1,fwdr l aff 1,ffr l aff] ++ ep [lft l aff 1,fwdl l aff 1,ffl l aff]
   where
-    fwd' = fwd l aff
-    fwdl' = fwdl l aff
-    fwdr' = fwdr l aff
-    rgt' = rgt l aff
-    lft' = lft l aff
-    ffr = relLoc l aff (1,2)
-    ffl = relLoc l aff (-1,2)
     b = Board m capt bs
     lastb = last bs
     ep locs = [locs!!1 | 
