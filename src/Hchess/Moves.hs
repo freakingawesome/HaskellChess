@@ -75,6 +75,19 @@ possibleMovesByPiece b l (Piece t Rook _) =
     ++ lineOfSightMaybeCapture b t l (0,-1)
     ++ lineOfSightMaybeCapture b t l (-1,0))
 
+-- Knight
+possibleMovesByPiece b l (Piece (Team aff t) Knight _) =
+  getMoves b l (
+    emptyOrEnemy b (Team aff t) (map (relLoc l aff) [
+      (1,2),
+      (1,-2),
+      (2,1),
+      (2,-1),
+      (-1,2),
+      (-1,-2),
+      (-2,1),
+      (-2,-1)]))
+
 -- One last catch-all for unknown pieces
 possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ show p)
 
@@ -144,6 +157,13 @@ lineOfSightMaybeCapture b (Team aff t) l (r,f)
   where 
     targetLoc = relLoc l aff (r,f)
     p = pieceAt targetLoc b
+
+emptyOrEnemy :: Board -> Team -> [Location] -> [Location]
+emptyOrEnemy b t [] = []
+emptyOrEnemy b t (l:ls)
+  | p == Right Nothing || isEnemy t p = l : emptyOrEnemy b t ls
+  | otherwise = emptyOrEnemy b t ls
+  where p = pieceAt l b
 
 -- Places the piece on the end of the board's captured list
 recordCapture :: Board -> Team -> Maybe Piece -> Board

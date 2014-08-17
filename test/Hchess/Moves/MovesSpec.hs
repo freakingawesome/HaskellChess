@@ -193,23 +193,37 @@ spec = do
 
     it "can move in straight lines" $ do 
       sort (moveTargets (stdPossibleMoves [(teamWhite,"Rd4")] "d4")) `shouldBe` sort [
-          "d5","d6","d7","d8",
-          "e4","f4","g4","h4",
-          "d3","d2","d1",
-          "c4","b4","a4"]
+        "d5","d6","d7","d8",
+        "e4","f4","g4","h4",
+        "d3","d2","d1",
+        "c4","b4","a4"]
 
     it "can move in straight lines up to and including capture" $ do 
       sort (moveTargets (stdPossibleMoves [(teamWhite,"Rd4"),(teamBlack,"pd7 pg4 pd2 pc4")] "d4")) `shouldBe` sort [
-          "d5","d6","d7",
-          "e4","f4","g4",
-          "d3","d2",
-          "c4"]
+        "d5","d6","d7",
+        "e4","f4","g4",
+        "d3","d2",
+        "c4"]
 
     it "cannot budge teammates" $ do 
       sort (moveTargets (stdPossibleMoves [(teamWhite,"Rd4 pd7 pg4 pd2 pc4")] "d4")) `shouldBe` sort [
-          "d5","d6",
-          "e4","f4",
-          "d3"]
+        "d5","d6",
+        "e4","f4",
+        "d3"]
+
+  describe "A knight" $ do
+
+    it "can do what a knight does" $ do
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Nd4")] "d4")) `shouldBe` sort [
+        "e6","f5","f3","e2","c2","b3","b5","c6"]
+
+    it "can capture enemies at any of those squares" $ do
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Nd4"),(teamBlack,"pe6 pf3 pc2 pb5")] "d4")) `shouldBe` sort [
+        "e6","f5","f3","e2","c2","b3","b5","c6"]
+
+    it "cannot budge teammates" $ do
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Nd4 pe6 pf3 pc2 pb5")] "d4")) `shouldBe` sort [
+        "f5","e2","b3","c6"]
 
   where 
     teamBlack = Team South "Black"
