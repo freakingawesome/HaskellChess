@@ -178,9 +178,16 @@ spec = do
         it "should have the missing pawn in the captured list" $ do
           captured possibleBoard `shouldBe` Map.fromList [(teamBlack,[Piece teamWhite Pawn [loc "c2",loc "c4"]])]
 
-    -- test to make sure en passant isn't valid if the opportunity is missed
-    -- check the resulting board returned in the possible move
-    -- do the moves in reverse (white first) to make sure it can only be performed in the correct order
+    describe "when the positions are right for en passant but the opportunity has passed" $ do
+      let
+        b = newStandardBoard teamWhite teamBlack
+        Move (_,_) b' = move b (loc "a2",loc "a3")
+        Move (_,_) b'' = move b' (loc "b7",loc "b4") -- not a legal move, I'm cheating for now
+        Move (_,_) b''' = move b'' (loc "a3",loc "a4")
+        pm = possibleMovesFromLocation b''' (loc "b4") 
+
+      it "should not allow en passant from black at b4" $ do
+        loc "a3" `elem` getTargetLocationsFromMoves pm `shouldBe` False
 
   where 
     teamBlack = Team South "Black"
