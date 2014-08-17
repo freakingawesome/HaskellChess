@@ -2,8 +2,9 @@ module Hchess.Moves where
 
 import Hchess.Board
 import qualified Data.Map as Map
-import Data.Maybe(fromJust)
 import Data.Either.Unwrap
+import Data.Maybe
+
 data Move = Move (Location,Location) Board deriving (Show,Eq)
 
 possibleMovesFromLocation :: Board -> Location -> Either String [Move]
@@ -53,19 +54,19 @@ possibleMovesByPiece (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
   let 
     b = Board m capt bs
     p = Piece (Team aff t) Pawn ls
-    straight = if ls == [] then 
+    straight = if null ls then 
       lineOfSightUnoccupied b [fwd' 1,fwd' 2] 
     else 
       filterUnoccupied b [fwd' 1]
     diag = filterOccupiedByEnemy b (Team aff t) [fwdl' 1, fwdr' 1]
-  in getMoves b l (straight ++ diag ++ (getEnPassantTargetLocations b l p))
+  in getMoves b l (straight ++ diag ++ getEnPassantTargetLocations b l p)
   where
     fwd' = fwd l aff
     fwdl' = fwdl l aff
     fwdr' = fwdr l aff
 
 -- One last catch-all for unknown pieces
-possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ (show p))
+possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ show p)
 
 getMoves :: Board -> Location -> [Location] -> [Move]
 getMoves _ _ [] = []
@@ -80,15 +81,16 @@ move (Board m capt bs) (from,to) = Move (from,to) b''''
     moverAff (Piece (Team aff _) _ _) = aff
     moverTeam (Piece t _ _) = t
     (b'',dead) = 
-      if isEnPassantCapture then 
-        pickUpPiece b' (relLoc to (moverAff mover) (0,-1))
-      else
-        pickUpPiece b' to 
+      pickUpPiece b' (
+        if isEnPassantCapture then 
+          relLoc to (moverAff mover) (0,-1) 
+        else 
+          to)
     b''' = recordCapture b'' (getTeam mover) dead
     b'''' = recordLastBoard (placePiece b''' to mover) (Board m capt bs)
     isEnPassantCapture = 
       moverChar mover == Pawn 
-      && ((to == (relLoc from (moverAff mover) (1,1))) || (to == (relLoc from (moverAff mover) (-1,1))))
+      && (to == relLoc from (moverAff mover) (1,1) || to == relLoc from (moverAff mover) (-1,1))
       && isEmpty (pieceAt to b')
       && isEnemyPawn (pieceAt (relLoc to (moverAff mover) (0,-1)) b') (moverTeam mover) 
 
@@ -99,16 +101,16 @@ pickUpPiece (Board m capt bs) l = (Board (Map.update removePiece l m) capt bs, p
     removePiece _ = Just Nothing 
     recordLastLocation (Piece t c ls) = Piece t c (ls ++ [l])
     p' = 
-      if p == Nothing then 
+      if isNothing p then 
         Nothing 
       else 
         Just (recordLastLocation (fromJust p))
 
 filterUnoccupied :: Board -> [Location] -> [Location]
-filterUnoccupied b ls = filter (\x -> pieceAt x b == Right Nothing) ls
+filterUnoccupied b = filter (\x -> pieceAt x b == Right Nothing)
 
 filterOccupiedByEnemy :: Board -> Team -> [Location] -> [Location]
-filterOccupiedByEnemy b t ls = filter (\x -> isEnemy t (pieceAt x b)) ls
+filterOccupiedByEnemy b t = filter (\x -> isEnemy t (pieceAt x b))
 
 isEnemy :: Team -> Either String Square -> Bool
 isEnemy us (Right (Just (Piece t _ _))) = us /= t
@@ -119,7 +121,7 @@ lineOfSightUnoccupied :: Board -> [Location] -> [Location]
 lineOfSightUnoccupied _ [] = []
 lineOfSightUnoccupied b (l:ls) = 
   if pieceAt l b == Right Nothing then 
-    l:(lineOfSightUnoccupied b ls) 
+    l:lineOfSightUnoccupied b ls
   else 
     []
 
@@ -127,7 +129,7 @@ lineOfSightUnoccupied b (l:ls) =
 recordCapture :: Board -> Team -> Maybe Piece -> Board
 recordCapture b _ Nothing = b
 recordCapture (Board m capt bs) t (Just p)
-  | existingTeam == Nothing = Board m (Map.fromList [(t,[p])]) bs
+  | isNothing existingTeam = Board m (Map.fromList [(t,[p])]) bs
   | otherwise = Board m (Map.update appendPiece t capt) bs
   where 
     existingTeam = Map.lookup t capt
@@ -152,17 +154,13 @@ getEnPassantTargetLocations (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
     ffl = relLoc l aff (-1,2)
     b = Board m capt bs
     lastb = last bs
-    ep locs = 
-      if isEnemyPawn (pieceAt (locs!!0) b) (Team aff t) 
-        && isEmpty (pieceAt (locs!!1) b) 
-        && isEmpty (pieceAt (locs!!2) b) 
-        && isEnemyPawn (pieceAt (locs!!2) lastb) (Team aff t) 
-        && isEmpty (pieceAt (locs!!1) lastb) 
-        && isEmpty (pieceAt (locs!!0) lastb) 
-      then 
-        [locs!!1]
-      else 
-        []
+    ep locs = [locs!!1 | 
+      isEnemyPawn (pieceAt (head locs) b) (Team aff t) 
+      && isEmpty (pieceAt (locs!!1) b) 
+      && isEmpty (pieceAt (locs!!2) b) 
+      && isEnemyPawn (pieceAt (locs!!2) lastb) (Team aff t) 
+      && isEmpty (pieceAt (locs!!1) lastb) 
+      && isEmpty (pieceAt (head locs) lastb)]
 
 getEnPassantTargetLocations _ _ _ = []
 

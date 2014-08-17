@@ -4,6 +4,7 @@ import qualified Data.Map as Map
 import Data.Char (chr,ord)
 import Data.List (sort)
 import Data.List.Split (splitOn)
+import Data.Maybe
 
 data Character = 
   Pawn | Rook | Knight | Bishop | Queen | King
@@ -44,7 +45,7 @@ placeTeam b (t,s) = placeTeamPlayers b (t,splitOn " " s)
 
 placeTeamPlayers :: Board -> (Team,[String]) -> Board
 placeTeamPlayers b (_,[]) = b
-placeTeamPlayers b (t,(p:ps)) = 
+placeTeamPlayers b (t,p:ps) = 
   let (character,location) = fromAlgebraicCharacterLocation p
   in placePiece (placeTeamPlayers b (t,ps)) location (Piece t character [])
 
@@ -52,7 +53,7 @@ placePiece :: Board -> Location -> Piece -> Board
 placePiece (Board m capt bs) (x,y) p = 
   let 
     insertOrFail val = 
-      if val == Nothing then 
+      if isNothing val then 
         Just (Just p) 
       else 
         error "Square is already occupied"
