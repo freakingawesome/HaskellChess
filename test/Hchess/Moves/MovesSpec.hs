@@ -225,6 +225,28 @@ spec = do
       sort (moveTargets (stdPossibleMoves [(teamWhite,"Nd4 pe6 pf3 pc2 pb5")] "d4")) `shouldBe` sort [
         "f5","e2","b3","c6"]
 
+  describe "A bishop" $ do
+
+    it "can move in diagonal lines" $ do 
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Bd4")] "d4")) `shouldBe` sort [
+        "e5","f6","g7","h8",
+        "e3","f2","g1",
+        "c3","b2","a1",
+        "c5","b6","a7"]
+
+    it "can move in diagonal lines up to and including capture" $ do 
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Bd4"),(teamBlack,"pg7 pf2 pc3 pb6")] "d4")) `shouldBe` sort [
+        "e5","f6","g7",
+        "e3","f2",
+        "c3",
+        "c5","b6"]
+
+    it "cannot budge teammates" $ do 
+      sort (moveTargets (stdPossibleMoves [(teamWhite,"Bd4 pg7 pf2 pc3 pb6")] "d4")) `shouldBe` sort [
+        "e5","f6",
+        "e3",
+        "c5"]
+
   where 
     teamBlack = Team South "Black"
     teamWhite = Team North "White"
