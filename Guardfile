@@ -1,7 +1,7 @@
 # Pulled from http://pbrisbin.com/posts/automated_unit_testing_in_haskell/
 # also needs:
 #   apt-get install ruby1.9.1-dev
-#   gem install guard-file
+#   gem install guard-shell
 #
 # Runs the command and prints a notification
 def execute(cmd)
