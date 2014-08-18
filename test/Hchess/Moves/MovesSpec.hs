@@ -26,7 +26,7 @@ spec = do
       stdPossibleMoves [(white,"pd2"),(black,"pd3")] "d2" `shouldBe` Right []
 
     it "can move forward diagonally if occupied by enemies" $ do
-      moveTargets (stdPossibleMoves [(white,"pd2"),(black,"pc3 pe3")] "d2") `shouldBe` ["c3", "d3", "d4", "e3"]
+      moveTargets (stdPossibleMoves [(white,"pd2 Kh1"),(black,"pc3 pe3 Kh8")] "d2") `shouldBe` ["c3", "d3", "d4", "e3"]
       
     it "cannot move forward diagonally if occupied by teammates" $ do
       moveTargets (stdPossibleMoves [(white,"pd2 pc3 pe3")] "d2") `shouldBe` ["d3", "d4"]
@@ -45,10 +45,10 @@ spec = do
 
   describe "A super tiny board" $ do
     it "should not allow pawns moving off the edge if below absolute north" $ do
-      moveTargets (possibleMovesFromLocation (newBoard 2 2 [(white,"pa1")]) (loc "a1")) `shouldBe` ["a2"]
+      moveTargets (possibleMovesFromLocation (newBoard 2 2 [(white,"pa1")]) (loc "a1") 1) `shouldBe` ["a2"]
  
     it "should not allow pawns moving off the edge if at absolute north" $ do
-      possibleMovesFromLocation (newBoard 2 2 [(white,"pa2")]) (loc "a2") `shouldBe` Right []
+      possibleMovesFromLocation (newBoard 2 2 [(white,"pa2")]) (loc "a2") 1 `shouldBe` Right []
   
   describe "The board after a threatened pawn moves" $ do
     let b = b8x8 [(white,"pd2"),(black,"pe3")]
@@ -137,7 +137,7 @@ spec = do
         b = newStandardBoard white black
         Move (_,_) b' = move b (loc "b7",loc "b4") -- not a legal move, I'm cheating for now
         Move (_,_) b'' = move b' (loc "a2",loc "a4")
-        pm = possibleMovesFromLocation b'' (loc "b4") 
+        pm = possibleMovesFromLocation b'' (loc "b4") 1
 
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "a3"]
@@ -160,7 +160,7 @@ spec = do
         b = newStandardBoard white black
         Move (_,_) b' = move b (loc "b7",loc "b4") -- not a legal move, I'm cheating for now
         Move (_,_) b'' = move b' (loc "c2",loc "c4")
-        pm = possibleMovesFromLocation b'' (loc "b4") 
+        pm = possibleMovesFromLocation b'' (loc "b4") 1
 
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "c3"]
@@ -184,7 +184,7 @@ spec = do
         Move (_,_) b' = move b (loc "a2",loc "a3")
         Move (_,_) b'' = move b' (loc "b7",loc "b4") -- not a legal move, I'm cheating for now
         Move (_,_) b''' = move b'' (loc "a3",loc "a4")
-        pm = possibleMovesFromLocation b''' (loc "b4") 
+        pm = possibleMovesFromLocation b''' (loc "b4") 1
 
       it "should not allow en passant from black at b4" $ do
         loc "a3" `elem` getTargetLocationsFromMoves pm `shouldBe` False
@@ -192,21 +192,21 @@ spec = do
   describe "A rook" $ do
 
     it "can move in straight lines" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Rd4")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Rd4 Kh1")] "d4")) `shouldBe` sort [
         "d5","d6","d7","d8",
         "e4","f4","g4","h4",
         "d3","d2","d1",
         "c4","b4","a4"]
 
     it "can move in straight lines up to and including capture" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Rd4"),(black,"pd7 pg4 pd2 pc4")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Rd4 Kh1"),(black,"pd7 pg4 pd2 pc4 Kh8")] "d4")) `shouldBe` sort [
         "d5","d6","d7",
         "e4","f4","g4",
         "d3","d2",
         "c4"]
 
     it "cannot budge teammates" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Rd4 pd7 pg4 pd2 pc4")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Rd4 pd7 pg4 pd2 pc4 Kh1")] "d4")) `shouldBe` sort [
         "d5","d6",
         "e4","f4",
         "d3"]
@@ -214,35 +214,35 @@ spec = do
   describe "A knight" $ do
 
     it "can do what a knight does" $ do
-      sort (moveTargets (stdPossibleMoves [(white,"Nd4")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Nd4 Kh1")] "d4")) `shouldBe` sort [
         "e6","f5","f3","e2","c2","b3","b5","c6"]
 
     it "can capture enemies at any of those squares" $ do
-      sort (moveTargets (stdPossibleMoves [(white,"Nd4"),(black,"pe6 pf3 pc2 pb5")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Nd4 Kh1"),(black,"pe6 pf3 pc2 pb5 Kh8")] "d4")) `shouldBe` sort [
         "e6","f5","f3","e2","c2","b3","b5","c6"]
 
     it "cannot budge teammates" $ do
-      sort (moveTargets (stdPossibleMoves [(white,"Nd4 pe6 pf3 pc2 pb5")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Nd4 pe6 pf3 pc2 pb5 Kh1")] "d4")) `shouldBe` sort [
         "f5","e2","b3","c6"]
 
   describe "A bishop" $ do
 
     it "can move in diagonal lines" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Bd4")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Bd4 Kh1")] "d4")) `shouldBe` sort [
         "e5","f6","g7","h8",
         "e3","f2","g1",
         "c3","b2","a1",
         "c5","b6","a7"]
 
     it "can move in diagonal lines up to and including capture" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Bd4"),(black,"pg7 pf2 pc3 pb6")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Bd4 Kh1"),(black,"pg7 pf2 pc3 pb6 Kh8")] "d4")) `shouldBe` sort [
         "e5","f6","g7",
         "e3","f2",
         "c3",
         "c5","b6"]
 
     it "cannot budge teammates" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Bd4 pg7 pf2 pc3 pb6")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Bd4 pg7 pf2 pc3 pb6 Kh1")] "d4")) `shouldBe` sort [
         "e5","f6",
         "e3",
         "c5"]
@@ -250,7 +250,7 @@ spec = do
   describe "A queen" $ do
 
     it "can do whatever she damn well pleases" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Qd4")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Qd4 Kh1")] "d4")) `shouldBe` sort [
         -- horizontal (copied from rook)
         "d5","d6","d7","d8",
         "e4","f4","g4","h4",
@@ -263,7 +263,7 @@ spec = do
         "c5","b6","a7"]
 
     it "can do whatever she damn well pleases up to and including capture" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Qd4"),(black,"pd7 pg4 pd2 pc4 pg7 pf2 pc3 pb6")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Qd4 Kh1"),(black,"pd7 pg4 pd2 pc4 pg7 pf2 pc3 pb6 Kh8")] "d4")) `shouldBe` sort [
         -- horizontal (copied from rook)
         "d5","d6","d7",
         "e4","f4","g4",
@@ -276,7 +276,7 @@ spec = do
         "c5","b6"]
 
     it "can do whatever she damn well pleases except for budging her teammates" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Qd4 pd7 pg4 pd2 pc4 pg7 pf2 pc3 pb6")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Qd4 pd7 pg4 pd2 pc4 pg7 pf2 pc3 pb6 Kh1")] "d4")) `shouldBe` sort [
         -- horizontal (copied from rook)
         "d5","d6",
         "e4","f4",
@@ -302,7 +302,7 @@ spec = do
         "c5"]
 
     it "can take one step anywhere and capture" $ do 
-      sort (moveTargets (stdPossibleMoves [(white,"Kd4"),(black,"pe4 pc4 pe3 pc5")] "d4")) `shouldBe` sort [
+      sort (moveTargets (stdPossibleMoves [(white,"Kd4"),(black,"pe3 pd3 pc3")] "d4")) `shouldBe` sort [
         -- horizontal
         "d5",
         "e4",
@@ -326,12 +326,25 @@ spec = do
     -- TODO: Castling with the King and Rook
     -- TODO: Promotion when a pawn reaches their affinity
 
+  describe "King protection" $ do
+
+    it "means that a King cannot put himself in check" $ do
+      sort (moveTargets (stdPossibleMoves [(white,"Kd2"),(black,"Bh5 Ra3")] "d2")) `shouldBe` sort [
+        "e1",
+        "c1",
+        "c2"]
+
+    it "means a blocking teammate must not leave the defensive" $ do
+      sort (moveTargets (stdPossibleMoves [(white,"Kd2 Qd4"),(black,"Rd8 Kh8")] "d4")) `shouldBe` sort [
+        "d5","d6","d7","d8",
+        "d3"]
+
   where 
     black = Team South "Black"
     white = Team North "White"
     b8x8 ps = newBoard 8 8 ps
-    stdPossibleMoves ts al = possibleMovesFromLocation (b8x8 ts) (fromAlgebraicLocation al)
-    stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al)
+    stdPossibleMoves ts al = possibleMovesFromLocation (b8x8 ts) (fromAlgebraicLocation al) 1
+    stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al) 1
     captured (Board _ capt _) = capt
     getBoard (Move _ b) = b
     getMap (Board m _ _) = m

@@ -7,13 +7,20 @@ import Data.Maybe
 
 data Move = Move (Location,Location) Board deriving (Show,Eq)
 
-possibleMovesFromLocation :: Board -> Location -> Either String [Move]
-possibleMovesFromLocation b l = possibleMoves b l (pieceAt l b)
+-- HACK: This "deep" parameter allows us to stop checking possible boards for king-in-check. It 
+-- should probably be based on team count, and there's probably a better way to do this, but hey,
+-- the tests pass for now.
+possibleMovesFromLocation :: Board -> Location -> Int -> Either String [Move]
+possibleMovesFromLocation b l = possibleMoves b l (pieceAt l b) 
 
-possibleMoves :: Board -> Location -> Either String Square -> Either String [Move]
-possibleMoves _ _ (Left err) = Left err 
-possibleMoves b l (Right (Just x)) = Right (possibleMovesByPiece b l x)
-possibleMoves _ _ (Right Nothing) = Left "Location is empty"
+possibleMoves :: Board -> Location -> Either String Square -> Int -> Either String [Move]
+possibleMoves _ _ (Left err) _ = Left err 
+possibleMoves b l (Right (Just (Piece t c ls))) deep = Right (protectKing moves)
+  where 
+    moves = possibleMovesByPiece b l (Piece t c ls)
+    protectKing ms = [ Move m b' | Move m b' <- ms, not (isKingInCheck t b' deep)]
+
+possibleMoves _ _ (Right Nothing) _ = Left "Location is empty"
 
 relLoc :: Location -> Affinity -> (Int,Int) -> Location
 relLoc (x,y) North (r,f) = (x+r,y+f)
@@ -226,3 +233,21 @@ isEmpty :: Either String Square -> Bool
 isEmpty (Right Nothing) = True
 isEmpty _ = False
 
+isKingInCheck :: Team -> Board -> Int -> Bool
+isKingInCheck t b deep = deep > 0 && kingLoc `elem` possibleEnemyLocs
+  where
+    kingLoc = head [ loc | (loc,Piece _ c _) <- mySquares t b, c == King ]
+    enemyLocs = [ loc | (loc,p) <- enemySquares t b ]
+    possibleEnemyLocs = [ loc | Move (_,loc) _ <- concatMap (\l -> fromRight (possibleMovesFromLocation b l (deep - 1))) enemyLocs ]
+
+mySquares :: Team -> Board -> [(Location,Piece)]
+mySquares t (Board map capt boards) = 
+  [ (loc,fromJust square) | (loc,square) <- Map.toList map, 
+    isJust square, 
+    getTeam (fromJust square) == t ]
+
+enemySquares :: Team -> Board -> [(Location,Piece)]
+enemySquares t (Board map capt boards) = 
+  [ (loc,fromJust square) | (loc,square) <- Map.toList map, 
+    isJust square, 
+    getTeam (fromJust square) /= t ]
