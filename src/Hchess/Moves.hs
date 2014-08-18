@@ -187,7 +187,7 @@ lineOfSightMaybeCapture b (Team aff t) l (r,f)
     p = pieceAt targetLoc b
 
 emptyOrEnemy :: Board -> Team -> [Location] -> [Location]
-emptyOrEnemy b t [] = []
+emptyOrEnemy _ _ [] = []
 emptyOrEnemy b t (l:ls)
   | p == Right Nothing || isEnemy t p = l : emptyOrEnemy b t ls
   | otherwise = emptyOrEnemy b t ls
@@ -210,7 +210,7 @@ recordLastBoard (Board m capt bs) old = Board m capt (bs ++ [old])
 -- if en passant is possible for either side.
 getEnPassantTargetLocations :: Board -> Location -> Piece -> [Location]
 getEnPassantTargetLocations (Board _ _ []) _ _ = []
-getEnPassantTargetLocations (Board m capt bs) l (Piece (Team aff t) Pawn ls) =
+getEnPassantTargetLocations (Board m capt bs) l (Piece (Team aff t) Pawn _) =
   ep [rgt l aff 1,fwdr l aff 1,ffr l aff] ++ ep [lft l aff 1,fwdl l aff 1,ffl l aff]
   where
     b = Board m capt bs
@@ -237,17 +237,17 @@ isKingInCheck :: Team -> Board -> Int -> Bool
 isKingInCheck t b deep = deep > 0 && kingLoc `elem` possibleEnemyLocs
   where
     kingLoc = head [ loc | (loc,Piece _ c _) <- mySquares t b, c == King ]
-    enemyLocs = [ loc | (loc,p) <- enemySquares t b ]
+    enemyLocs = [ loc | (loc,_) <- enemySquares t b ]
     possibleEnemyLocs = [ loc | Move (_,loc) _ <- concatMap (\l -> fromRight (possibleMovesFromLocation b l (deep - 1))) enemyLocs ]
 
 mySquares :: Team -> Board -> [(Location,Piece)]
-mySquares t (Board map capt boards) = 
-  [ (loc,fromJust square) | (loc,square) <- Map.toList map, 
+mySquares t (Board m _ _) = 
+  [ (loc,fromJust square) | (loc,square) <- Map.toList m, 
     isJust square, 
     getTeam (fromJust square) == t ]
 
 enemySquares :: Team -> Board -> [(Location,Piece)]
-enemySquares t (Board map capt boards) = 
-  [ (loc,fromJust square) | (loc,square) <- Map.toList map, 
+enemySquares t (Board m _ _) = 
+  [ (loc,fromJust square) | (loc,square) <- Map.toList m, 
     isJust square, 
     getTeam (fromJust square) /= t ]
