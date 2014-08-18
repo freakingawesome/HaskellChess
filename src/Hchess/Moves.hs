@@ -88,6 +88,18 @@ possibleMovesByPiece b l (Piece (Team aff t) Knight _) =
 possibleMovesByPiece b l (Piece t Bishop _) =
   getMoves b l (concatMap (lineOfSightMaybeCapture b t l) [(1,1),(1,-1),(-1,1),(-1,-1)])
 
+-- Queen
+possibleMovesByPiece b l (Piece t Queen _) =
+  getMoves b l (concatMap (lineOfSightMaybeCapture b t l) [
+    (0,1),
+    (1,0),
+    (0,-1),
+    (-1,0),
+    (1,1),
+    (1,-1),
+    (-1,1),
+    (-1,-1)])
+
 -- One last catch-all for unknown pieces
 possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ show p)
 

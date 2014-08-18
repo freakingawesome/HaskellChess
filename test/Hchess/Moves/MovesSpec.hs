@@ -247,6 +247,45 @@ spec = do
         "e3",
         "c5"]
 
+  describe "A queen" $ do
+
+    it "can do whatever she damn well pleases" $ do 
+      sort (moveTargets (stdPossibleMoves [(white,"Qd4")] "d4")) `shouldBe` sort [
+        -- horizontal (copied from rook)
+        "d5","d6","d7","d8",
+        "e4","f4","g4","h4",
+        "d3","d2","d1",
+        "c4","b4","a4",
+        -- diagonal (copied from bishop)
+        "e5","f6","g7","h8",
+        "e3","f2","g1",
+        "c3","b2","a1",
+        "c5","b6","a7"]
+
+    it "can do whatever she damn well pleases up to and including capture" $ do 
+      sort (moveTargets (stdPossibleMoves [(white,"Qd4"),(black,"pd7 pg4 pd2 pc4 pg7 pf2 pc3 pb6")] "d4")) `shouldBe` sort [
+        -- horizontal (copied from rook)
+        "d5","d6","d7",
+        "e4","f4","g4",
+        "d3","d2",
+        "c4",
+        -- diagonal (copied from bishop)
+        "e5","f6","g7",
+        "e3","f2",
+        "c3",
+        "c5","b6"]
+
+    it "can do whatever she damn well pleases except for budging her teammates" $ do 
+      sort (moveTargets (stdPossibleMoves [(white,"Qd4 pd7 pg4 pd2 pc4 pg7 pf2 pc3 pb6")] "d4")) `shouldBe` sort [
+        -- horizontal (copied from rook)
+        "d5","d6",
+        "e4","f4",
+        "d3",
+        -- diagonal (copied from bishop)
+        "e5","f6",
+        "e3",
+        "c5"]
+
   where 
     black = Team South "Black"
     white = Team North "White"
