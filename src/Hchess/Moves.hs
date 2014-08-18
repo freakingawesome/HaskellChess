@@ -100,8 +100,17 @@ possibleMovesByPiece b l (Piece t Queen _) =
     (-1,1),
     (-1,-1)])
 
--- One last catch-all for unknown pieces
-possibleMovesByPiece _ _ p = error ("Piece not yet handled: " ++ show p)
+possibleMovesByPiece b l (Piece (Team aff t) King _) =
+  getMoves b l (
+    emptyOrEnemy b (Team aff t) (map (relLoc l aff) [
+      (0,1),
+      (1,0),
+      (0,-1),
+      (-1,0),
+      (1,1),
+      (1,-1),
+      (-1,1),
+      (-1,-1)]))
 
 getMoves :: Board -> Location -> [Location] -> [Move]
 getMoves _ _ [] = []

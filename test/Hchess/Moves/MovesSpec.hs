@@ -286,6 +286,43 @@ spec = do
         "e3",
         "c5"]
 
+  describe "A king" $ do
+
+    it "can take one step anywhere" $ do 
+      sort (moveTargets (stdPossibleMoves [(white,"Kd4")] "d4")) `shouldBe` sort [
+        -- horizontal
+        "d5",
+        "e4",
+        "d3",
+        "c4",
+        -- diagonal
+        "e5",
+        "e3",
+        "c3",
+        "c5"]
+
+    it "can take one step anywhere and capture" $ do 
+      sort (moveTargets (stdPossibleMoves [(white,"Kd4"),(black,"pe4 pc4 pe3 pc5")] "d4")) `shouldBe` sort [
+        -- horizontal
+        "d5",
+        "e4",
+        "d3",
+        "c4",
+        -- diagonal
+        "e5",
+        "e3",
+        "c3",
+        "c5"]
+
+    it "cannot budge teammates" $ do 
+      sort (moveTargets (stdPossibleMoves [(white,"Kd4 pe4 pc4 pe3 pc5")] "d4")) `shouldBe` sort [
+        -- horizontal
+        "d5",
+        "d3",
+        -- diagonal
+        "e5",
+        "c3"]
+
   where 
     black = Team South "Black"
     white = Team North "White"
