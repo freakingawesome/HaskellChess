@@ -322,6 +322,9 @@ spec = do
         -- diagonal
         "e5",
         "c3"]
+    
+    -- TODO: Castling with the King and Rook
+    -- TODO: Promotion when a pawn reaches their affinity
 
   where 
     black = Team South "Black"
