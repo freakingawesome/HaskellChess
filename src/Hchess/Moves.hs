@@ -107,9 +107,10 @@ possibleMovesByPiece b l (Piece t Queen _) =
     (-1,1),
     (-1,-1)])
 
-possibleMovesByPiece b l (Piece (Team aff t) King _) =
+-- King
+possibleMovesByPiece b l (Piece (Team aff t) King ms) =
   getMoves b l (
-    emptyOrEnemy b (Team aff t) (map (relLoc l aff) [
+    emptyOrEnemy b (Team aff t) (map (relLoc l aff) ([
       (0,1),
       (1,0),
       (0,-1),
@@ -117,7 +118,15 @@ possibleMovesByPiece b l (Piece (Team aff t) King _) =
       (1,1),
       (1,-1),
       (-1,1),
-      (-1,-1)]))
+      (-1,-1)] ++ getCastlingPositionsFromKing)))
+  where
+    getCastlingPositionsFromKing = 
+      if null ms then
+        []
+      else
+        castLeft ++ castRight
+    castLeft = [(-2,0) | not (null (lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (-1,0)))]
+    castRight = [(2,0) | not (null (lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (1,0)))]
 
 getMoves :: Board -> Location -> [Location] -> [Move]
 getMoves _ _ [] = []
@@ -186,6 +195,17 @@ lineOfSightMaybeCapture b (Team aff t) l (r,f)
     targetLoc = relLoc l aff (r,f)
     p = pieceAt targetLoc b
 
+-- Used for castling
+lineOfSightEndingInUnmovedTeamRook :: Board -> Team -> Location -> (Int,Int) -> [Location]
+lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (r,f)
+  | p == Right Nothing = if null restOfSquares then [] else targetLoc : restOfSquares
+  | isTeammateUnmovedRook p (Team aff t) = [targetLoc]
+  | otherwise = []
+  where 
+    targetLoc = relLoc l aff (r,f)
+    p = pieceAt targetLoc b
+    restOfSquares = lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (r,f)
+
 emptyOrEnemy :: Board -> Team -> [Location] -> [Location]
 emptyOrEnemy _ _ [] = []
 emptyOrEnemy b t (l:ls)
@@ -232,6 +252,10 @@ isEnemyPawn _ _ = False
 isEmpty :: Either String Square -> Bool
 isEmpty (Right Nothing) = True
 isEmpty _ = False
+
+isTeammateUnmovedRook :: Either String Square -> Team -> Bool
+isTeammateUnmovedRook (Right (Just (Piece team Rook ms))) t = team == t && null ms
+isTeammateUnmovedRook _ _ = False
 
 isKingInCheck :: Team -> Board -> Int -> Bool
 isKingInCheck t b deep = deep > 0 && kingLoc `elem` possibleEnemyLocs
