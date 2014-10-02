@@ -122,9 +122,9 @@ possibleMovesByPiece b l (Piece (Team aff t) King ms) =
   where
     getCastlingPositionsFromKing = 
       if null ms then
-        []
-      else
         castLeft ++ castRight
+      else
+        []
     castLeft = [(-2,0) | not (null (lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (-1,0)))]
     castRight = [(2,0) | not (null (lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (1,0)))]
 
