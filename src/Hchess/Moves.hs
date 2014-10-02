@@ -204,7 +204,7 @@ lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (r,f)
   where 
     targetLoc = relLoc l aff (r,f)
     p = pieceAt targetLoc b
-    restOfSquares = lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (r,f)
+    restOfSquares = lineOfSightEndingInUnmovedTeamRook b (Team aff t) (relLoc l aff (r,f)) (r,f)
 
 emptyOrEnemy :: Board -> Team -> [Location] -> [Location]
 emptyOrEnemy _ _ [] = []

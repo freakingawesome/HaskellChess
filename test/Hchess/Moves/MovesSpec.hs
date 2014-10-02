@@ -351,6 +351,20 @@ spec = do
         "d5","d6","d7","d8",
         "d3"]
 
+  describe "Castling helpers" $ do
+    describe "Calculating the line of site from a standard king" $ do
+      let
+        b = b8x8 [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qc3 Qf3")]
+        toTheLeft = alglocs (lineOfSightEndingInUnmovedTeamRook b white (loc "d1") (-1,0))
+        toTheRight = alglocs (lineOfSightEndingInUnmovedTeamRook b white (loc "d1") (1,0))
+
+      it "should have a clear line of site to the left Rook" $ do
+        toTheLeft `shouldBe` ["c1", "b1", "a1"]
+
+      it "should have a clear line of site to the right Rook" $ do
+        toTheRight `shouldBe` ["e1", "f1", "g1", "h1"]
+        
+
   where 
     black = Team South "Black"
     white = Team North "White"
@@ -379,6 +393,13 @@ loc = fromAlgebraicLocation
 locs :: [String] -> [Location]
 locs [] = []
 locs (x:xs) = loc x : locs xs
+
+algloc :: Location -> String
+algloc = toAlgebraicLocation
+
+alglocs :: [Location] -> [String]
+alglocs [] = []
+alglocs (x:xs) = algloc x : alglocs xs
 
 injectBoardHistory :: Board -> [(String,[String])] -> Board
 injectBoardHistory b [] = b
