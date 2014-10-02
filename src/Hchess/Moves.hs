@@ -258,22 +258,27 @@ isTeammateUnmovedRook (Right (Just (Piece team Rook ms))) t = team == t && null 
 isTeammateUnmovedRook _ _ = False
 
 isKingInCheck :: Team -> Board -> Int -> Bool
-isKingInCheck t b deep = isLocationCapturable t b kingLoc deep
+isKingInCheck t b deep = 
+  if null kingSquares then
+    False -- HACK: a bit of a hack so that I don't have to put a king in all my tests
+  else
+    isLocationCapturable t b kingLoc deep
   where
-    kingLoc = head [ loc | (loc,Piece _ c _) <- mySquares t b, c == King ]
+    kingSquares = [ loc | (loc,Piece _ c _) <- mySquares t b, c == King ]
+    kingLoc = head kingSquares
 
 isLocationCapturable :: Team -> Board -> Location -> Int -> Bool
 isLocationCapturable _ _ _ 0 = False
 isLocationCapturable t b l deep = deep > 0 && l `elem` possibleEnemyLocs
   where
-    enemyLocs = [ loc | (loc,_) <- enemySquares t b ]
+    enemyLocs = [ loc | (loc,_) <- enemySquaresThatCouldAttack t b l ]
     possibleEnemyLocs = [ loc | Move (_,loc) _ <- concatMap (\l' -> fromRight (possibleMovesFromLocation b l' (deep - 1))) enemyLocs ]
 
 -- Added for the castling check to make sure nothing is in check
 simpleIsLocationCapturable :: Team -> Board -> Location -> Bool
 simpleIsLocationCapturable t b l = l `elem` possibleEnemyLocs
   where
-    enemyLocs = [ loc | (loc,_) <- enemySquares t b ]
+    enemyLocs = [ loc | (loc,_) <- enemySquaresThatCouldAttack t b l ]
     possibleEnemyLocs = [ loc | Move (_,loc) _ <- concatMap (\l' -> fromRight (possibleMovesFromLocation b l' 0)) enemyLocs ]
 
 mySquares :: Team -> Board -> [(Location,Piece)]
@@ -287,3 +292,33 @@ enemySquares t (Board m _ _) =
   [ (loc,fromJust square) | (loc,square) <- Map.toList m, 
     isJust square, 
     getTeam (fromJust square) /= t ]
+
+enemySquaresThatCouldAttack :: Team -> Board -> Location -> [(Location,Piece)]
+enemySquaresThatCouldAttack (Team aff tname) (Board m capt bs) l = 
+  [ (loc,fromJust square) | (loc,square) <- Map.toList m, 
+    isJust square, 
+    getTeam (fromJust square) /= t,
+    loc `elem` allAttackableLocations ]
+  where
+    t = Team aff tname
+    los = lineOfSightMaybeCapture (Board m capt bs) t l
+    allAttackableLocations = 
+      los (0,1)
+      ++ los (1,1)
+      ++ los (1,0)
+      ++ los (1,-1)
+      ++ los (0,-1)
+      ++ los (-1,-1)
+      ++ los (-1,0)
+      ++ los (-1,1)
+      ++ [
+        relLoc l aff (1,2),
+        relLoc l aff (2,1),
+        relLoc l aff (2,-1),
+        relLoc l aff (1,-2),
+        relLoc l aff (-1,-2),
+        relLoc l aff (-2,-1),
+        relLoc l aff (-2,1),
+        relLoc l aff (-1,2)
+      ]
+
