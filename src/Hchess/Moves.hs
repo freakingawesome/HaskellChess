@@ -197,14 +197,14 @@ lineOfSightMaybeCapture b (Team aff t) l (r,f)
 
 -- Used for castling
 lineOfSightEndingInUnmovedTeamRook :: Board -> Team -> Location -> (Int,Int) -> [Location]
-lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (r,f)
+lineOfSightEndingInUnmovedTeamRook b (Team aff t) l direction
   | p == Right Nothing = if null restOfSquares then [] else targetLoc : restOfSquares
   | isTeammateUnmovedRook p (Team aff t) = [targetLoc]
   | otherwise = []
   where 
-    targetLoc = relLoc l aff (r,f)
+    targetLoc = relLoc l aff direction
     p = pieceAt targetLoc b
-    restOfSquares = lineOfSightEndingInUnmovedTeamRook b (Team aff t) (relLoc l aff (r,f)) (r,f)
+    restOfSquares = lineOfSightEndingInUnmovedTeamRook b (Team aff t) targetLoc direction
 
 emptyOrEnemy :: Board -> Team -> [Location] -> [Location]
 emptyOrEnemy _ _ [] = []
