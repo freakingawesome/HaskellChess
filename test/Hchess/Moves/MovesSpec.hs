@@ -324,10 +324,10 @@ spec = do
         "c3"]
     
     describe "on a board where castling can happen either way" $ do
-      let 
-        ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qc3 Qf3")] "d1"
       
-      it "can castle to either the left or right" $ do
+      it "can castle to either the left or right in ideal circumstances" $ do
+        let 
+          ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qc3 Qf3")] "d1"
         sort (moveTargets ms) `shouldBe` sort [
           "b1",
           "c1",
@@ -335,7 +335,14 @@ spec = do
           "f1"
           ]
       
-    -- TODO: Castling with the King and Rook
+      it "can't castle when in check" $ do
+        let 
+          ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qd3")] "d1"
+        sort (moveTargets ms) `shouldBe` sort [
+          "c1",
+          "e1"
+          ]
+      
     -- TODO: Promotion when a pawn reaches their affinity
 
   describe "King protection" $ do
