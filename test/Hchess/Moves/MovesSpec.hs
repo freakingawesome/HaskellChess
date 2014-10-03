@@ -342,7 +342,38 @@ spec = do
           "c1",
           "e1"
           ]
-      
+
+      it "can't castle when rook is capturable" $ do
+        let 
+          ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pb2 pc2 pd2 pe2 pf2 pg2"),(black,"Ra3 Rh3")] "d1"
+        sort (moveTargets ms) `shouldBe` sort [
+          "c1",
+          "e1"
+          ]
+
+      it "can't castle when the square the king leaps over is capturable" $ do
+        let 
+          ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pd2 pf2 pg2 ph2"),(black,"Rc3 Re3")] "d1"
+        sort (moveTargets ms) `shouldBe` []
+
+      it "can't castle when the king's target square is capturable" $ do
+        let 
+          ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pc2 pd2 pe2 pg2 ph2"),(black,"Rb3 Rf3")] "d1"
+        sort (moveTargets ms) `shouldBe` sort [
+          "c1",
+          "e1"
+          ]
+
+      it "can castle when that lonely empty square by the far rook is capturable" $ do
+        let 
+          ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 ph2"),(black,"Rg3")] "d1"
+        sort (moveTargets ms) `shouldBe` sort [
+          "b1",
+          "c1",
+          "e1",
+          "f1"
+          ]
+
     -- TODO: Promotion when a pawn reaches their affinity
 
   describe "King protection" $ do

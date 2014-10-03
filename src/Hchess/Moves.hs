@@ -127,9 +127,14 @@ possibleMovesByPiece b l (Piece (Team aff t) King ms) =
           castlingLocs
       else
           []
-    castLeft = [(-2,0) | not (null (lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (-1,0)))]
-    castRight = [(2,0) | not (null (lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (1,0)))]
+    lineOfSight dir = lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (dir,0)
+    castlingPossible dir = 
+      not (null (lineOfSight dir))
+      && foldr (&&) True (first2AndLast1 (map (\cloc -> not (isLocationImmediatelyThreatened (Team aff t) b cloc)) (lineOfSight dir)))
+    castLeft = [(-2,0) | castlingPossible (-1)]
+    castRight = [(2,0) | castlingPossible 1]
     castlingLocs = castLeft ++ castRight
+    first2AndLast1 list = take 2 list ++ [last list]
 
 getMoves :: Board -> Location -> [Location] -> [Move]
 getMoves _ _ [] = []
