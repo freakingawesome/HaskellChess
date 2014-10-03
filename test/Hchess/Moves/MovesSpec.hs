@@ -328,6 +328,7 @@ spec = do
       it "can castle to either the left or right in ideal circumstances" $ do
         let 
           ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qc3 Qf3")] "d1"
+
         sort (moveTargets ms) `shouldBe` sort [
           "b1",
           "c1",
@@ -374,6 +375,60 @@ spec = do
           "f1"
           ]
 
+  describe "Making sure castling is not possible once the involved parties have moved" $ do
+    let
+      pieces = [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qc3 Qf3")]
+      b = b8x8 pieces
+      Move (_,_) kingMoved = move b (loc "d1",loc "e1")
+      Move (_,_) rookLeftMoved = move b (loc "a1",loc "b1")
+      Move (_,_) rookRightMoved = move b (loc "h1",loc "g1")
+
+    it "can't castle once the king has moved" $ do
+      let 
+        ms = stdPossibleMovesFromBoard kingMoved "e1"
+      sort (moveTargets ms) `shouldBe` sort [
+        "d1",
+        "f1"
+        ]
+
+    it "can't castle left once the left rook has moved" $ do
+      let 
+        ms = stdPossibleMovesFromBoard rookLeftMoved "d1"
+      sort (moveTargets ms) `shouldBe` sort [
+        "c1",
+        "e1",
+        "f1"
+        ]
+
+    it "can't castle right once the right rook has moved" $ do
+      let 
+        ms = stdPossibleMovesFromBoard rookRightMoved "d1"
+      sort (moveTargets ms) `shouldBe` sort [
+        "b1",
+        "c1",
+        "e1"
+        ]
+
+  describe "The resulting board from castling" $ do
+    let
+      pieces = [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qc3 Qf3")]
+      b = b8x8 pieces
+      Move (_,_) bLeft = move b (loc "d1",loc "b1")
+      Move (_,_) bRight = move b (loc "d1",loc "f1")
+
+    it "should result in the castle jumping to the expected square when castling left" $ do
+      fromRight (pieceAt (loc "b1") bLeft) `shouldBe` Just (Piece white King [loc "d1"])
+
+    it "should move the left rook when castling left" $ do
+      fromRight (pieceAt (loc "c1") bLeft) `shouldBe` Just (Piece white Rook [loc "a1"])
+
+    it "should result in the castle jumping to the expected square when castling right" $ do
+      fromRight (pieceAt (loc "f1") bRight) `shouldBe` Just (Piece white King [loc "d1"])
+
+    it "should move the right rook when castling right" $ do
+      fromRight (pieceAt (loc "e1") bRight) `shouldBe` Just (Piece white Rook [loc "h1"])
+
+
     -- TODO: Promotion when a pawn reaches their affinity
 
   describe "King protection" $ do
@@ -407,7 +462,8 @@ spec = do
     black = Team South "Black"
     white = Team North "White"
     b8x8 ps = newBoard 8 8 ps
-    stdPossibleMoves ts al = possibleMovesFromLocation (b8x8 ts) (fromAlgebraicLocation al) 1
+    stdPossibleMoves ts al = stdPossibleMovesFromBoard (b8x8 ts) al
+    stdPossibleMovesFromBoard b al = possibleMovesFromLocation b (fromAlgebraicLocation al) 1
     stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al) 1
     captured (Board _ capt _) = capt
     getBoard (Move _ b) = b
