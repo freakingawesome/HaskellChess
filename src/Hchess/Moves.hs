@@ -121,12 +121,15 @@ possibleMovesByPiece b l (Piece (Team aff t) King ms) =
       (-1,-1)] ++ getCastlingPositionsFromKing)))
   where
     getCastlingPositionsFromKing = 
-      if null ms then -- TODO: Fix the stack overflow: && not (simpleIsLocationCapturable (Team aff t) b l) then
-        castLeft ++ castRight
+      if null ms 
+        && not (null castlingLocs)
+        && not (isLocationImmediatelyThreatened (Team aff t) b l) then
+          castlingLocs
       else
-        []
+          []
     castLeft = [(-2,0) | not (null (lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (-1,0)))]
     castRight = [(2,0) | not (null (lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (1,0)))]
+    castlingLocs = castLeft ++ castRight
 
 getMoves :: Board -> Location -> [Location] -> [Move]
 getMoves _ _ [] = []
@@ -275,8 +278,8 @@ isLocationCapturable t b l deep = deep > 0 && l `elem` possibleEnemyLocs
     possibleEnemyLocs = [ loc | Move (_,loc) _ <- concatMap (\l' -> fromRight (possibleMovesFromLocation b l' (deep - 1))) enemyLocs ]
 
 -- Added for the castling check to make sure nothing is in check
-simpleIsLocationCapturable :: Team -> Board -> Location -> Bool
-simpleIsLocationCapturable t b l = l `elem` possibleEnemyLocs
+isLocationImmediatelyThreatened :: Team -> Board -> Location -> Bool
+isLocationImmediatelyThreatened t b l = l `elem` possibleEnemyLocs
   where
     enemyLocs = [ loc | (loc,_) <- enemySquaresThatCouldAttack t b l ]
     possibleEnemyLocs = [ loc | Move (_,loc) _ <- concatMap (\l' -> fromRight (possibleMovesFromLocation b l' 0)) enemyLocs ]

@@ -337,7 +337,7 @@ spec = do
       
       it "can't castle when in check" $ do
         let 
-          ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qd3")] "d1"
+          ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pe2 pf2 pg2 ph2"),(black,"Qd3")] "d1"
         sort (moveTargets ms) `shouldBe` sort [
           "c1",
           "e1"
