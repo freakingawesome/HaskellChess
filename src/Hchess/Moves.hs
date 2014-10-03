@@ -7,6 +7,9 @@ import Data.Maybe
 
 data Move = Move (Location,Location) Board deriving (Show,Eq)
 
+getBoardFromMove :: Move -> Board
+getBoardFromMove (Move (_,_) b) = b
+
 -- HACK: This "deep" parameter allows us to stop checking possible boards for king-in-check. It 
 -- should probably be based on team count, and there's probably a better way to do this, but hey,
 -- the tests pass for now.
@@ -144,7 +147,8 @@ getMoves b from (to:tos) = move b (from,to) : getMoves b from tos
 move :: Board -> (Location,Location) -> Move
 move (Board m capt bs) (from,to) = Move (from,to) b''''
   where
-    (b',Just mover) = pickUpPiece (Board m capt bs) from
+    fromPiece = fromJust (fromRight (pieceAt from (Board m capt bs)))
+    (b',Just mover) = pickUpPiece (ifCastlingFirstMoveRook (Board m capt bs)) from
     moverChar (Piece _ c _) = c
     moverAff (Piece (Team aff _) _ _) = aff
     moverTeam (Piece t _ _) = t
@@ -161,6 +165,14 @@ move (Board m capt bs) (from,to) = Move (from,to) b''''
       && (to == relLoc from (moverAff mover) (1,1) || to == relLoc from (moverAff mover) (-1,1))
       && isEmpty (pieceAt to b')
       && isEnemyPawn (pieceAt (relLoc to (moverAff mover) (0,-1)) b') (moverTeam mover) 
+    isCastling horizJump =
+      moverChar fromPiece == King
+      && (fst to) - (fst from) == horizJump
+    ifCastlingFirstMoveRook initialBoard
+      -- TODO: Make this a little prettier. I finished castling right before leaving on a friday, hence its ugliness
+      | isCastling (-2) = getBoardFromMove (move initialBoard ((last (lineOfSightEndingInUnmovedTeamRook initialBoard (getTeam fromPiece) from (-1,0))),((fst from)-1,snd from)))
+      | isCastling (2) = getBoardFromMove (move initialBoard ((last (lineOfSightEndingInUnmovedTeamRook initialBoard (getTeam fromPiece) from (1,0))),((fst from)+1,snd from)))
+      | otherwise = initialBoard
 
 pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
 pickUpPiece (Board m capt bs) l = (Board (Map.update removePiece l m) capt bs, p')
