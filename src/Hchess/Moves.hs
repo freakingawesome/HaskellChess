@@ -133,7 +133,7 @@ possibleMovesByPiece b l (Piece (Team aff t) King ms) =
     lineOfSight dir = lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (dir,0)
     castlingPossible dir = 
       not (null (lineOfSight dir))
-      && foldr (&&) True (first2AndLast1 (map (\cloc -> not (isLocationImmediatelyThreatened (Team aff t) b cloc)) (lineOfSight dir)))
+      && and (first2AndLast1 (map (not.isLocationImmediatelyThreatened (Team aff t) b) (lineOfSight dir)))
     castLeft = [(-2,0) | castlingPossible (-1)]
     castRight = [(2,0) | castlingPossible 1]
     castlingLocs = castLeft ++ castRight
@@ -167,15 +167,15 @@ move (Board m capt bs) (from,to) = Move (from,to) b''''
       && isEnemyPawn (pieceAt (relLoc to (moverAff mover) (0,-1)) b') (moverTeam mover) 
     ifCastlingFirstMoveRook initialBoard
       | isCastling (-2) = getBoardFromMove (move initialBoard (locOfCastlingRook (-1)))
-      | isCastling (2) = getBoardFromMove (move initialBoard (locOfCastlingRook 1))
+      | isCastling 2 = getBoardFromMove (move initialBoard (locOfCastlingRook 1))
       | otherwise = initialBoard
       where
         isCastling horizJump =
           moverChar fromPiece == King
-          && (fst to) - (fst from) == horizJump
+          && fst to - fst from == horizJump
         locOfCastlingRook sign = (
-          (last (lineOfSightEndingInUnmovedTeamRook initialBoard (getTeam fromPiece) from (sign,0))),
-          ((fst from) + sign,snd from))
+          last (lineOfSightEndingInUnmovedTeamRook initialBoard (getTeam fromPiece) from (sign,0)),
+          (fst from + sign,snd from))
 
 pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
 pickUpPiece (Board m capt bs) l = (Board (Map.update removePiece l m) capt bs, p')
@@ -282,10 +282,8 @@ isTeammateUnmovedRook _ _ = False
 
 isKingInCheck :: Team -> Board -> Int -> Bool
 isKingInCheck t b deep = 
-  if null kingSquares then
-    False -- HACK: a bit of a hack so that I don't have to put a king in all my tests
-  else
-    isLocationCapturable t b kingLoc deep
+  not (null kingSquares) -- HACK: a bit of a hack so that I don't have to put a king in all my tests
+    && isLocationCapturable t b kingLoc deep
   where
     kingSquares = [ loc | (loc,Piece _ c _) <- mySquares t b, c == King ]
     kingLoc = head kingSquares
