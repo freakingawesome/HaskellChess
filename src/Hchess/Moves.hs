@@ -165,14 +165,17 @@ move (Board m capt bs) (from,to) = Move (from,to) b''''
       && (to == relLoc from (moverAff mover) (1,1) || to == relLoc from (moverAff mover) (-1,1))
       && isEmpty (pieceAt to b')
       && isEnemyPawn (pieceAt (relLoc to (moverAff mover) (0,-1)) b') (moverTeam mover) 
-    isCastling horizJump =
-      moverChar fromPiece == King
-      && (fst to) - (fst from) == horizJump
     ifCastlingFirstMoveRook initialBoard
-      -- TODO: Make this a little prettier. I finished castling right before leaving on a friday, hence its ugliness
-      | isCastling (-2) = getBoardFromMove (move initialBoard ((last (lineOfSightEndingInUnmovedTeamRook initialBoard (getTeam fromPiece) from (-1,0))),((fst from)-1,snd from)))
-      | isCastling (2) = getBoardFromMove (move initialBoard ((last (lineOfSightEndingInUnmovedTeamRook initialBoard (getTeam fromPiece) from (1,0))),((fst from)+1,snd from)))
+      | isCastling (-2) = getBoardFromMove (move initialBoard (locOfCastlingRook (-1)))
+      | isCastling (2) = getBoardFromMove (move initialBoard (locOfCastlingRook 1))
       | otherwise = initialBoard
+      where
+        isCastling horizJump =
+          moverChar fromPiece == King
+          && (fst to) - (fst from) == horizJump
+        locOfCastlingRook sign = (
+          (last (lineOfSightEndingInUnmovedTeamRook initialBoard (getTeam fromPiece) from (sign,0))),
+          ((fst from) + sign,snd from))
 
 pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
 pickUpPiece (Board m capt bs) l = (Board (Map.update removePiece l m) capt bs, p')
