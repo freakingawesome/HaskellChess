@@ -142,7 +142,11 @@ possibleMovesByPiece b l (Piece (Team aff t) King ms) =
 getMoves :: Board -> Location -> [Location] -> [Move]
 getMoves _ _ [] = []
 getMoves b from (to:tos) = 
-  if isPawnPromotion then pawnPromotionMoves else [move b (from,to)] ++ getMoves b from tos
+  if isPawnPromotion then 
+      pawnPromotionMoves 
+  else 
+      [move b (from,to)]
+    ++ getMoves b from tos
   where
     fromAff (Just (Piece (Team aff _) _ _)) = aff
     fromPiece = fromRight (pieceAt from b)
