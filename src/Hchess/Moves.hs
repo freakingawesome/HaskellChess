@@ -164,9 +164,8 @@ getMoves b from (to:tos) =
       ]
       where
         swapTargetChar (Move locs b) toChar = Move locs (swapCharAt to b toChar)
-        -- TODO: Implement swapCharAt so that it returns a board with just the
-        -- character swapped out and we should be fine
-        swapCharAt loc b toChar = b
+        swapCharAt loc (Board m capt bs) toChar = (Board (Map.update (swapChar toChar) loc m) capt bs)
+        swapChar toChar (Just (Piece t c pl)) = Just (Just (Piece t toChar pl))
 
 -- Performs an already vetted move.
 move :: Board -> (Location,Location) -> Move
