@@ -145,9 +145,10 @@ getMoves b from (to:tos) =
   if isPawnPromotion then 
       pawnPromotionMoves 
   else 
-      [move b (from,to)]
+      [basicMove]
     ++ getMoves b from tos
   where
+    basicMove = move b (from,to)
     fromAff (Just (Piece (Team aff _) _ _)) = aff
     fromPiece = fromRight (pieceAt from b)
     isPawn (Just (Piece _ Pawn _)) = True
@@ -155,7 +156,17 @@ getMoves b from (to:tos) =
     isPawnPromotion = isPawn fromPiece
       && isRight (pieceAt to b)
       && isLeft (pieceAt (relLoc to (fromAff fromPiece) (0,1)) b)
-    pawnPromotionMoves = take 4 (repeat (move b (from,to)))
+    pawnPromotionMoves = [
+      swapTargetChar basicMove Rook,
+      swapTargetChar basicMove Knight,
+      swapTargetChar basicMove Bishop,
+      swapTargetChar basicMove Queen
+      ]
+      where
+        swapTargetChar (Move locs b) toChar = Move locs (swapCharAt to b toChar)
+        -- TODO: Implement swapCharAt so that it returns a board with just the
+        -- character swapped out and we should be fine
+        swapCharAt loc b toChar = b
 
 -- Performs an already vetted move.
 move :: Board -> (Location,Location) -> Move

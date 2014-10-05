@@ -434,8 +434,21 @@ spec = do
 
     it "should have a possible move for each piece the pawn could turn into" $ do
       length ms `shouldBe` 4
-      
-    -- TODO: Promotion when a pawn reaches their affinity
+
+    it "should have a queen, knight, rook, and bishop in the target location of the moves" $ do
+      let
+        boards = map getBoard ms
+        toSquares = map (\b -> (fromJust (fromRight (pieceAt (loc "d8") b)))) boards
+        charAt (Piece _ c _) = c
+      map charAt toSquares `shouldBe` sort [
+        Rook,
+        Knight,
+        Bishop,
+        Queen
+        ]
+
+    it "shouldn't be possible if a piece is blocking the target location" $ do
+      sort (moveTargets (stdPossibleMoves [(white,"pd7"),(black,"pd8")] "d7")) `shouldBe` []
 
   describe "King protection" $ do
 
