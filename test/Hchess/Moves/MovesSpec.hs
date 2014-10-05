@@ -450,6 +450,9 @@ spec = do
     it "shouldn't be possible if a piece is blocking the target location" $ do
       sort (moveTargets (stdPossibleMoves [(white,"pd7"),(black,"pd8")] "d7")) `shouldBe` []
 
+    it "should still be able to attack diagonally if possible" $ do
+      length (fromRight (stdPossibleMoves [(white,"pd7"),(black,"pc8 ce8")] "d7")) `shouldBe` 6
+
   describe "King protection" $ do
 
     it "means that a King cannot put himself in check" $ do

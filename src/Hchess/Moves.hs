@@ -142,11 +142,11 @@ possibleMovesByPiece b l (Piece (Team aff t) King ms) =
 getMoves :: Board -> Location -> [Location] -> [Move]
 getMoves _ _ [] = []
 getMoves b from (to:tos) = 
-  if isPawnPromotion then 
-      pawnPromotionMoves 
+  (if isPawnPromotion then 
+    pawnPromotionMoves 
   else 
-      [basicMove]
-    ++ getMoves b from tos
+    [basicMove])
+  ++ getMoves b from tos
   where
     basicMove = move b (from,to)
     fromAff (Just (Piece (Team aff _) _ _)) = aff
@@ -154,6 +154,7 @@ getMoves b from (to:tos) =
     isPawn (Just (Piece _ Pawn _)) = True
     isPawn _ = False
     isPawnPromotion = isPawn fromPiece
+      && relLoc from (fromAff fromPiece) (0,1) == to
       && isRight (pieceAt to b)
       && isLeft (pieceAt (relLoc to (fromAff fromPiece) (0,1)) b)
     pawnPromotionMoves = [
@@ -164,7 +165,7 @@ getMoves b from (to:tos) =
       ]
       where
         swapTargetChar (Move locs b) toChar = Move locs (swapCharAt to b toChar)
-        swapCharAt loc (Board m capt bs) toChar = (Board (Map.update (swapChar toChar) loc m) capt bs)
+        swapCharAt loc (Board m capt bs) toChar = Board (Map.update (swapChar toChar) loc m) capt bs
         swapChar toChar (Just (Piece t c pl)) = Just (Just (Piece t toChar pl))
 
 -- Performs an already vetted move.
