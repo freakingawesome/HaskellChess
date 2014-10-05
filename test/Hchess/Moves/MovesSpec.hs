@@ -45,7 +45,7 @@ spec = do
 
   describe "A super tiny board" $ do
     it "should not allow pawns moving off the edge if below absolute north" $ do
-      moveTargets (possibleMovesFromLocation (newBoard 2 2 [(white,"pa1")]) (loc "a1") 1) `shouldBe` ["a2"]
+      moveTargets (possibleMovesFromLocation (newBoard 2 2 [(white,"pa1")]) (loc "a1") 1) `shouldBe` replicate 4 "a2" -- 4 because of pawn promotion
  
     it "should not allow pawns moving off the edge if at absolute north" $ do
       possibleMovesFromLocation (newBoard 2 2 [(white,"pa2")]) (loc "a2") 1 `shouldBe` Right []
@@ -428,7 +428,13 @@ spec = do
     it "should move the right rook when castling right" $ do
       fromRight (pieceAt (loc "e1") bRight) `shouldBe` Just (Piece white Rook [loc "h1"])
 
+  describe "Pawn promotion" $ do
+    let
+      ms = fromRight (stdPossibleMoves [(white,"pd7")] "d7")
 
+    it "should have a possible move for each piece the pawn could turn into" $ do
+      length ms `shouldBe` 4
+      
     -- TODO: Promotion when a pawn reaches their affinity
 
   describe "King protection" $ do
