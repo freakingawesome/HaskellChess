@@ -2,7 +2,7 @@ module Hchess.Board where
 
 import qualified Data.Map as Map
 import Data.Char (chr,ord)
-import Data.List (sort)
+import Data.List (sort,nub)
 import Data.List.Split (splitOn)
 import Data.Maybe
 
@@ -96,4 +96,8 @@ pieceAt (x,y) (Board m _ _) =
 
 getTeam :: Piece -> Team
 getTeam (Piece t _ _) = t
+
+remainingTeams :: Board -> [Team]
+remainingTeams (Board m _ _) =
+  nub [ getTeam (fromJust square) | (_,square) <- Map.toList m, isJust square ]
 
