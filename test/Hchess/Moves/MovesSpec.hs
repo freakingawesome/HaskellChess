@@ -58,7 +58,7 @@ spec = do
         m = move b (loc "d2",loc "d3")
         b' = getBoard m
       it "should have no captures" $ do
-        captured b' `shouldBe` Map.empty
+        getCaptures b' `shouldBe` Map.empty
 
       it "should have no piece at d2" $ do
         pieceAt (loc "d2") b' `shouldBe` Right Nothing
@@ -153,7 +153,7 @@ spec = do
           pieceAt (loc "a4") possibleBoard `shouldBe` Right Nothing
 
         it "should have the missing pawn in the captured list" $ do
-          captured possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "a2",loc "a4"]])]
+          getCaptures possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "a2",loc "a4"]])]
 
     describe "on a board where black can perform en passant on the left" $ do
       let
@@ -176,7 +176,7 @@ spec = do
           pieceAt (loc "c4") possibleBoard `shouldBe` Right Nothing
 
         it "should have the missing pawn in the captured list" $ do
-          captured possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "c2",loc "c4"]])]
+          getCaptures possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "c2",loc "c4"]])]
 
     describe "when the positions are right for en passant but the opportunity has passed" $ do
       let
@@ -480,23 +480,46 @@ spec = do
         toTheRight `shouldBe` ["e1", "f1", "g1", "h1"]
         
 
-  where 
-    black = Team South "Black"
-    white = Team North "White"
-    b8x8 ps = newBoard 8 8 ps
-    stdPossibleMoves ts al = stdPossibleMovesFromBoard (b8x8 ts) al
-    stdPossibleMovesFromBoard b al = possibleMovesFromLocation b (fromAlgebraicLocation al) 1
-    stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al) 1
-    captured (Board _ capt _) = capt
-    getBoard (Move _ b) = b
-    getMap (Board m _ _) = m
-    pieceCount b = Map.size (Map.filter (\x -> x /= Nothing) (getMap b)) 
-    getCaptures (Board _ capt _) = capt
-    getTargetLocationsFromMoves (Right []) = []
-    getTargetLocationsFromMoves (Left _) = []
-    getTargetLocationsFromMoves (Right (Move (_,to) _:ls)) = to : getTargetLocationsFromMoves (Right ls)
-    getBoardHistory (Board _ _ hist) = hist
-    getBoardFromPossibleMoves pm ls = getBoard (head (filter (\(Move m _) -> m == ls) (fromRight pm)))
+black :: Team
+black = Team South "Black"
+
+white :: Team
+white = Team North "White"
+
+b8x8 :: [(Team,String)] -> Board
+b8x8 ps = newBoard 8 8 ps
+
+stdPossibleMoves :: [(Team,String)] -> String -> Either String [Move]
+stdPossibleMoves ts al = stdPossibleMovesFromBoard (b8x8 ts) al
+
+stdPossibleMovesFromBoard :: Board -> String -> Either String [Move]
+stdPossibleMovesFromBoard b al = possibleMovesFromLocation b (fromAlgebraicLocation al) 1
+
+stdPossibleMovesWithHistory :: [(Team,String)] -> [(String,[String])] -> String -> Either String [Move]
+stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al) 1
+
+getBoard :: Move -> Board
+getBoard (Move _ b) = b
+
+getMap :: Board -> Map.Map Location Square
+getMap (Board m _ _) = m
+
+pieceCount :: Board -> Int
+pieceCount b = Map.size (Map.filter (\x -> x /= Nothing) (getMap b)) 
+
+getCaptures :: Board -> CapturedPieceMap
+getCaptures (Board _ capt _) = capt
+
+getTargetLocationsFromMoves :: Either String [Move] -> [Location]
+getTargetLocationsFromMoves (Right []) = []
+getTargetLocationsFromMoves (Left _) = []
+getTargetLocationsFromMoves (Right (Move (_,to) _:ls)) = to : getTargetLocationsFromMoves (Right ls)
+
+getBoardHistory :: Board -> [Board]
+getBoardHistory (Board _ _ hist) = hist
+
+getBoardFromPossibleMoves :: Either String [Move] -> (Location,Location) -> Board
+getBoardFromPossibleMoves pm ls = getBoard (head (filter (\(Move m _) -> m == ls) (fromRight pm)))
 
 moveTargets :: Either String [Move] -> [String]
 moveTargets (Right []) = []

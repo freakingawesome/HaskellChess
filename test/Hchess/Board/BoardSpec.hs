@@ -55,13 +55,13 @@ spec = do
  
   describe "A new standard board" $ do
     it "should find a black rook at a8" $ do
-      standardBoardPieceAt "a8" `shouldBe` Right (Just (Piece teamBlack Rook []))
+      standardBoardPieceAt "a8" `shouldBe` Right (Just (Piece black Rook []))
 
     it "should find a white king at e1" $ do
-      standardBoardPieceAt "e1" `shouldBe` Right (Just (Piece teamWhite King []))
+      standardBoardPieceAt "e1" `shouldBe` Right (Just (Piece white King []))
 
     it "should find a black king at e8" $ do
-      standardBoardPieceAt "e8" `shouldBe` Right (Just (Piece teamBlack King []))
+      standardBoardPieceAt "e8" `shouldBe` Right (Just (Piece black King []))
 
     it "should find nothing in the middle of the board" $ do
       standardBoardPieceAt "d4" `shouldBe` Right Nothing
@@ -69,9 +69,15 @@ spec = do
     it "should tell you if a location is invalid" $ do
       standardBoardPieceAt "z9" `shouldBe` Left "Invalid location" -- TODO: assert isLeft instead
  
-  where 
-    boardSize (Board x _ _) = Map.size x
-    teamBlack = Team South "Black"
-    teamWhite = Team North "White"
-    standardBoardPieceAt s = pieceAt (fromAlgebraicLocation s) (newStandardBoard teamWhite teamBlack)
+boardSize :: Board -> Int
+boardSize (Board x _ _) = Map.size x
+
+black :: Team
+black = Team South "Black"
+
+white :: Team
+white = Team North "White"
+
+standardBoardPieceAt :: String -> Either String Square
+standardBoardPieceAt s = pieceAt (fromAlgebraicLocation s) (newStandardBoard white black)
 
