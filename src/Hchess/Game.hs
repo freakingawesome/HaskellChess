@@ -11,7 +11,7 @@ data Game = Game Board [Team] deriving (Eq,Show)
 newGame :: Int -> Int -> [(Team,String)] -> Game
 newGame _ _ [] = error "You must have at least two teams"
 newGame _ _ [t] = error "You must have at least two teams"
-newGame w h teamPlacement = Game (newBoard w h teamPlacement) (getTurns (map (\(t,s) -> t) teamPlacement))
+newGame w h teamPlacement = Game (newBoard w h teamPlacement) (getTurns (map fst teamPlacement))
 
 newStandardGame :: Game
 newStandardGame =
@@ -25,12 +25,12 @@ performMove :: Game -> (Location,Location) -> Maybe Character -> Either String G
 performMove (Game b teams) (from,to) promo
   | isLeft fromContents = Left "Invalid location"
   | isNothing fromSquare = Left "The source square is empty"
-  | fromTeam /= currentTeam (Game b teams) = Left $ "It is not " ++ (teamName fromTeam) ++ "'s turn"
+  | fromTeam /= currentTeam (Game b teams) = Left $ "It is not " ++ teamName fromTeam ++ "'s turn"
   | isLeft pms = Left "Illegal move" 
   | null possibleTargetLocs = Left "This piece is currently incapacitated"
-  | not (to `elem` possibleTargetLocs) = Left "Illegal move"
+  | to `notElem` possibleTargetLocs = Left "Illegal move"
   | to `elem` possibleTargetLocs = Right commitMove
-  | otherwise = Left "NOT YET IMPLEMENTED" -- causes inf loop Right (Game b teams)
+  | otherwise = error "NOT YET IMPLEMENTED"
   where
     fromContents = pieceAt from b
     fromSquare = fromRight fromContents
@@ -42,12 +42,12 @@ performMove (Game b teams) (from,to) promo
       if length targetMoves == 1 then
         head targetMoves
       else
-        error "Promotion not yet implemented"
+        error "PROMOTION NOT YET IMPLEMENTED"
     commitMove = Game (getBoardFromMove singleMove) (tail teams)
     
 getTurns :: Ord x => [x] -> [x]
 getTurns [] = []
-getTurns x = x ++ (getTurns x)
+getTurns x = x ++ getTurns x
 
 turnsToTeams :: Ord x => [x] -> [x]
 turnsToTeams [] = []
