@@ -101,3 +101,6 @@ remainingTeams :: Board -> [Team]
 remainingTeams (Board m _ _) =
   nub [ getTeam (fromJust square) | (_,square) <- Map.toList m, isJust square ]
 
+teamName :: Team -> String
+teamName (Team _ name) = name
+

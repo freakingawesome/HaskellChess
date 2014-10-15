@@ -35,7 +35,13 @@ spec = do
       performMove newStandardGame (loc "z3",loc "z4") Nothing `shouldBe` Left "Invalid location"
 
     it "errors out when moving from an empty square" $ do
-      performMove newStandardGame (loc "a3",loc "a4") Nothing `shouldBe` Left "Illegal move"
+      performMove newStandardGame (loc "b4",loc "a4") Nothing `shouldBe` Left "The source square is empty"
 
     it "only allows white to move first" $ do
-      performMove newStandardGame (loc "a7",loc "a6") Nothing `shouldBe` Left "error"
+      performMove newStandardGame (loc "a7",loc "a6") Nothing `shouldBe` Left "It is not Black's turn"
+
+    it "should not allow an impossible move" $ do
+      performMove newStandardGame (loc "a2",loc "a5") Nothing `shouldBe` Left "Illegal move"
+
+    it "should not allow an incapacitated piece to move" $ do
+      performMove newStandardGame (loc "a1",loc "a2") Nothing `shouldBe` Left "This piece is currently incapacitated"
