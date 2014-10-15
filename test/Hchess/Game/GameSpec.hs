@@ -1,6 +1,7 @@
 module Hchess.Game.GameSpec where
 
 import SpecHelper
+import TestUtil
 import qualified Data.Map as Map
 import Data.Maybe(fromJust)
 import Data.List(sort)

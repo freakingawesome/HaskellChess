@@ -1,7 +1,7 @@
 module Hchess.Board.BoardSpec where
 
 import SpecHelper
-import qualified Data.Map as Map
+import TestUtil
 
 spec :: Spec
 spec = do
@@ -69,15 +69,3 @@ spec = do
     it "should tell you if a location is invalid" $ do
       standardBoardPieceAt "z9" `shouldBe` Left "Invalid location" -- TODO: assert isLeft instead
  
-boardSize :: Board -> Int
-boardSize (Board x _ _) = Map.size x
-
-black :: Team
-black = Team South "Black"
-
-white :: Team
-white = Team North "White"
-
-standardBoardPieceAt :: String -> Either String Square
-standardBoardPieceAt s = pieceAt (fromAlgebraicLocation s) (newStandardBoard white black)
-
