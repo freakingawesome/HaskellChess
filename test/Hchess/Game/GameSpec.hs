@@ -29,3 +29,13 @@ spec = do
 
     it "should be able to change teams back into turns at other positions" $ do
       turnsToTeams (tail (getTurns [1,2,3])) `shouldBe` [2,3,1]
+
+  describe "A new standard game" $ do
+    it "errors out when moving from a non-existent square" $ do
+      performMove newStandardGame (loc "z3",loc "z4") Nothing `shouldBe` Left "Invalid location"
+
+    it "errors out when moving from an empty square" $ do
+      performMove newStandardGame (loc "a3",loc "a4") Nothing `shouldBe` Left "Illegal move"
+
+    it "only allows white to move first" $ do
+      performMove newStandardGame (loc "a7",loc "a6") Nothing `shouldBe` Left "error"
