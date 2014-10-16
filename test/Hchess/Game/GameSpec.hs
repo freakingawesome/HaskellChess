@@ -81,3 +81,23 @@ spec = do
 
       getCharacter (fromJust (fromRight (pieceAt (loc "b8") b))) `shouldBe` Queen
 
+  describe "Checking for stalemate" $ do
+    it "should not find a stalemate if it ain't so" $ do
+      isStalemate (newGame 8 8 [(white,"Ka1 pb7"),(black,"Kh7")]) `shouldBe` False
+
+    it "should find a stalemate if the current player can't move" $ do
+      isStalemate (newGame 8 8 [(white,"Kh8"),(black,"Kf7 Qg6")]) `shouldBe` True
+
+  describe "Checking for checkmate" $ do
+    let
+      cm = (newGame 8 8 [(white,"Kh8"),(black,"Kf7 Qh6")])
+
+    it "should not find a checkmate if it ain't so" $ do
+      isCheckmate (newGame 8 8 [(white,"Ka1 pb7"),(black,"Kh7")]) `shouldBe` False
+
+    it "should find a checkmate if the current player can't move and king is in check" $ do
+      isCheckmate cm `shouldBe` True
+
+    it "should not count a checkmate as a stalemate" $ do
+      isStalemate cm `shouldBe` False
+

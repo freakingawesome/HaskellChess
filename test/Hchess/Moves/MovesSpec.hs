@@ -467,6 +467,9 @@ spec = do
         "d5","d6","d7","d8",
         "d3"]
 
+    it "means we can end up in a stalemate" $ do
+      moveTargets (stdPossibleMoves [(white,"Kh8"),(black,"Kf7 Qg6")] "h8") `shouldBe` []
+
   describe "Castling helpers" $ do
     describe "Calculating the line of site from a standard king" $ do
       let
@@ -479,4 +482,18 @@ spec = do
 
       it "should have a clear line of site to the right Rook" $ do
         toTheRight `shouldBe` ["e1", "f1", "g1", "h1"]
+
+  describe "My possible moves" $ do
+    let
+      b = b8x8 [(white,"Ka1"),(black,"Kd4")]
+      sm = b8x8 [(white,"Kh8"),(black,"Kf7 Qg6")]
+
+    it "should only show the moves a sole limited white king can make" $ do
+      length (myPossibleMoves white b) `shouldBe` 3
+
+    it "should show a full circle of moves that the black king can make" $ do
+      length (myPossibleMoves black b) `shouldBe` 8
+
+    it "should show nothing if in a stalemate" $ do
+      length (myPossibleMoves white sm) `shouldBe` 0
 

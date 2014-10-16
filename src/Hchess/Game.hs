@@ -53,6 +53,14 @@ performMove (Game b teams) (from,to) promo
     promoTarget = [ Move (from',to') b | Move (from',to') b <- fromRight pms,
       getCharacter (fromJust (fromRight (pieceAt to' b))) == fromJust promo ]
     
+isStalemate :: Game -> Bool
+isStalemate (Game b (t:_)) = null (myPossibleMoves t b) && not (isKingInCheck t b 1)
+isStalemate _ = error "No teams specified"
+
+isCheckmate :: Game -> Bool
+isCheckmate (Game b (t:_)) = null (myPossibleMoves t b) && isKingInCheck t b 1
+isCheckmate _ = error "No teams specified"
+
 getTurns :: Ord x => [x] -> [x]
 getTurns [] = []
 getTurns x = x ++ getTurns x

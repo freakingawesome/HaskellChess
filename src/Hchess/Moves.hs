@@ -333,6 +333,11 @@ mySquares t (Board m _ _) =
     isJust square, 
     getTeam (fromJust square) == t ]
 
+myPossibleMoves :: Team -> Board -> [Move]
+myPossibleMoves t b = concatMap (\l' -> fromRight (possibleMovesFromLocation b l' 1)) myLocs
+  where
+    myLocs = map fst (mySquares t b)
+
 enemySquares :: Team -> Board -> [(Location,Piece)]
 enemySquares t (Board m _ _) = 
   [ (loc,fromJust square) | (loc,square) <- Map.toList m, 
