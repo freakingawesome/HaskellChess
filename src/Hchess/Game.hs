@@ -29,21 +29,29 @@ performMove (Game b teams) (from,to) promo
   | isLeft pms = Left "Illegal move" 
   | null possibleTargetLocs = Left "This piece is currently incapacitated"
   | to `notElem` possibleTargetLocs = Left "Illegal move"
-  | to `elem` possibleTargetLocs = Right commitMove
-  | otherwise = error "NOT YET IMPLEMENTED"
+  | length targetMoves == 1 =
+    if isJust promo then
+      Left "Promotion is not valid here"
+    else
+      Right (commitMove (head targetMoves))
+  | otherwise =
+    if isNothing promo then
+      Left "You must specify a character for promotion"
+    else
+      if length promoTarget == 1 then
+        Right (commitMove (head promoTarget))
+      else
+        Left "Invalid character for promotion"
   where
     fromContents = pieceAt from b
     fromSquare = fromRight fromContents
     pms = possibleMovesFromLocation b from (length (remainingTeams b)) 
     possibleTargetLocs = map (\(Move (_,to') _) -> to') (fromRight pms)
     fromTeam = getTeam (fromJust fromSquare)
-    targetMoves = [ Move (from',to') b |  Move (from',to') b <- fromRight pms, to' == to ]
-    singleMove =
-      if length targetMoves == 1 then
-        head targetMoves
-      else
-        error "PROMOTION NOT YET IMPLEMENTED"
-    commitMove = Game (getBoardFromMove singleMove) (tail teams)
+    targetMoves = [ Move (from',to') b | Move (from',to') b <- fromRight pms, to' == to ]
+    commitMove mv = Game (getBoardFromMove mv) (tail teams)
+    promoTarget = [ Move (from',to') b | Move (from',to') b <- fromRight pms,
+      getCharacter (fromJust (fromRight (pieceAt to' b))) == fromJust promo ]
     
 getTurns :: Ord x => [x] -> [x]
 getTurns [] = []

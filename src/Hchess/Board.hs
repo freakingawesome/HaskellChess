@@ -104,3 +104,6 @@ remainingTeams (Board m _ _) =
 teamName :: Team -> String
 teamName (Team _ name) = name
 
+getCharacter :: Piece -> Character
+getCharacter (Piece _ c _) = c
+

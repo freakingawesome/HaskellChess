@@ -5,6 +5,7 @@ import TestUtil
 import qualified Data.Map as Map
 import Data.Maybe(fromJust)
 import Data.List(sort)
+import Data.Either.Unwrap
 
 spec :: Spec
 spec = do
@@ -45,3 +46,38 @@ spec = do
 
     it "should not allow an incapacitated piece to move" $ do
       performMove newStandardGame (loc "a1",loc "a2") Nothing `shouldBe` Left "This piece is currently incapacitated"
+
+    it "should allow a possible move" $ do
+      isRight (performMove newStandardGame (loc "a2",loc "a4") Nothing) `shouldBe` True
+
+    it "should not allow specification of a promotion character when it isn't applicable" $ do
+      performMove newStandardGame (loc "a2",loc "a4") (Just Queen) `shouldBe` Left "Promotion is not valid here"
+
+  describe "The game after the first white move" $ do
+    let
+      Right g = performMove newStandardGame (loc "a2",loc "a4") Nothing
+      Game b teams = g
+      Right (Just (Piece t c _)) = pieceAt (loc "a4") b
+
+    it "should now be black's move" $ do
+      head teams `shouldBe` black
+
+    it "should have the new board placement" $ do
+      (t,c) `shouldBe` (white,Pawn)
+
+  describe "A move requiring promotion" $ do
+    let
+      g = newGame 8 8 [(white,"Ka1 pb7"),(black,"Kh7")]
+    
+    it "should require specification of a promotion character" $ do
+      performMove g (loc "b7",loc "b8") Nothing `shouldBe` Left "You must specify a character for promotion"
+
+    it "should not allow an invalid character for promotion" $ do
+      performMove g (loc "b7",loc "b8") (Just King) `shouldBe` Left "Invalid character for promotion"
+
+    it "should allow a promotion" $ do
+      let
+        Right (Game b _) = performMove g (loc "b7",loc "b8") (Just Queen) 
+
+      getCharacter (fromJust (fromRight (pieceAt (loc "b8") b))) `shouldBe` Queen
+
