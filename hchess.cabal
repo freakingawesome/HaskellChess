@@ -32,6 +32,7 @@ executable hchess
                , containers
                , split
                , either-unwrap
+               , regex-posix
 
 library
   exposed-modules:      Hchess
