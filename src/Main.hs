@@ -69,7 +69,13 @@ getUserInput g = do
       getUserInput g
 
 utf8Game :: Game -> String
-utf8Game (Game b (cur:_)) = utf8Board b ++ "\nIt is " ++ teamName cur ++ "'s turn\n"
+utf8Game (Game b (cur:turns)) = utf8Board b ++ "\nIt is " ++ teamName cur ++ "'s turn\n" ++ otherMessages
+  where
+    g = Game b (cur:turns)
+    otherMessages = ifStalemate ++ ifCheckmate ++ ifCurInCheck
+    ifStalemate = if isStalemate g then teamName cur ++ " is in stalemate!\n" else ""
+    ifCheckmate = if isCheckmate g then teamName cur ++ " is in checkmate!" ++ teamName (head turns) ++ " wins!\n" else ""
+    ifCurInCheck = if isKingInCheck cur b 1 then teamName cur ++ " is in check!\n" else ""
 
 utf8Board :: Board -> String
 utf8Board (Board m c bs) = boardRows (Board m c bs) len hgt
