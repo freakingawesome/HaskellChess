@@ -33,6 +33,7 @@ executable hchess
                , split
                , either-unwrap
                , regex-posix
+               , safe
 
 library
   exposed-modules:      Hchess

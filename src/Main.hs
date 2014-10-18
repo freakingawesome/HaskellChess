@@ -3,7 +3,8 @@ module Main where
 -- import Data.Map (fromList)
 import qualified Data.Map as Map
 -- import Data.Either.Unwrap
--- import Data.Maybe
+import Data.Maybe
+import Safe
 
 import Hchess.Board
 import Hchess.Moves
@@ -34,24 +35,30 @@ getUserInput g = do
       getUserInput g
     "mv" ->
       let
-        (_,_,_,mvs) = input =~ "^mv ([a-h][1-8]) ([a-h][1-8])$" :: (String,String,String,[String])
+        (_,_,_,mvs) = input =~ "^mv ([a-h][1-8]) ([a-h][1-8])( [a-zA-Z]+)?$" :: (String,String,String,[String])
       in do
       if null mvs then do
         putStrLn "Parse error. Should be something like: mv a2 a3"
         getUserInput g
       else
         let
-          (from,to) = (fromAlgebraicLocation (head mvs),fromAlgebraicLocation (mvs!!1))
+          (from,to,promoText) = (fromAlgebraicLocation (head mvs),fromAlgebraicLocation (mvs!!1),mvs!!2)
         in
           let
-            mv = performMove g (from,to) Nothing
+            promo = readMay (mvs!!2) :: Maybe Character
+            mv = performMove g (from,to) promo
+            
           in
-            if isLeft mv then do
-              putStrLn (fromLeft mv)
+            if not (null promoText) && isNothing promo then do
+              putStrLn "Invalid promotion character. Enter nothing, Queen, Bishop, Knight, or Rook"
               getUserInput g
             else do
-              putStrLn (utf8Game (fromRight mv))
-              getUserInput (fromRight mv)
+              if isLeft mv then do
+                putStrLn (fromLeft mv)
+                getUserInput g
+              else do
+                putStrLn (utf8Game (fromRight mv))
+                getUserInput (fromRight mv)
     "pm" -> do
       putStrLn "Show possible moves"
       getUserInput g
@@ -64,8 +71,11 @@ getUserInput g = do
       putStrLn "\n\
         \When you see <loc>, use algebraic notation. For example, a1 is the lower left\n\
         \corner and h8 is the upper right.\n\n\
-        \pm <loc>         Shows possible move from location\n\
-        \mv <loc> <loc>   Attempts to move the piece at the first loc to the second\n"
+        \pm <loc>               Shows possible move from location\n\
+        \mv <loc> <loc> [promo] Attempts to move the piece at the first loc to the second.\n\
+        \                       The promo field is only required for pawn promotion.\n\
+        \board                  Shows the board again.\n\
+        \exit                   exit\n"
       getUserInput g
 
 utf8Game :: Game -> String

@@ -8,7 +8,7 @@ import Data.Maybe
 
 data Character = 
   Pawn | Rook | Knight | Bishop | Queen | King
-  deriving (Show,Eq,Ord)
+  deriving (Show,Read,Eq,Ord)
 
 data Affinity = 
   North | East | South | West
