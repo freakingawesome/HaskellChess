@@ -78,7 +78,7 @@ getUserInput g = do
             else do
               putStrLn (utf8Game g targetLocs
                 ++ "\n"
-                ++ head mv
+                ++ head mvs
                 ++ " has "
                 ++ show (length (fromRight pms))
                 ++ " possible moves.\n"
