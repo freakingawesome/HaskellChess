@@ -18,7 +18,7 @@ import Text.Regex.Posix
 
 main :: IO ()
 main = do
-  putStrLn (utf8Game g)
+  putStrLn (utf8Game g [])
   getUserInput g
   return ()
   where g = newStandardGame
@@ -31,7 +31,7 @@ getUserInput g = do
     "help" -> showHelp
     "exit" -> putStrLn "Goodbye"
     "board" -> do
-      putStrLn (utf8Game g)
+      putStrLn (utf8Game g [])
       getUserInput g
     "mv" ->
       let
@@ -57,16 +57,33 @@ getUserInput g = do
                 putStrLn (fromLeft mv)
                 getUserInput g
               else do
-                putStrLn (utf8Game (fromRight mv))
+                putStrLn (utf8Game (fromRight mv) [])
                 getUserInput (fromRight mv)
-    "pm" -> do
-      putStrLn "Show possible moves"
-      getUserInput g
+    "pm" ->
+      let
+        (_,_,_,mvs) = input =~ "^pm ([a-h][1-8])$" :: (String,String,String,[String])
+      in do
+        if length mvs /= 1 then do
+          putStrLn "Parse error. Should be something like: pm a2"
+          getUserInput g
+        else
+          let
+            from = fromAlgebraicLocation (head mvs)
+            pms = possibleMovesFromLocation b from 1
+            targetLocs = map (\(Move (_,to) _) -> to) (fromRight pms)
+          in
+            if isLeft pms then do
+              putStrLn (fromLeft pms)
+              getUserInput g
+            else do
+              putStrLn (utf8Game g targetLocs ++ "\n" ++ head mvs ++ " has " ++ show (length (fromRight pms)) ++ " possible moves.")
+              getUserInput g
     _ -> do
       putStrLn "Huh?"
       getUserInput g
   return ()
   where
+    Game b _ = g
     showHelp = do
       putStrLn "\n\
         \When you see <loc>, use algebraic notation. For example, a1 is the lower left\n\
@@ -78,8 +95,8 @@ getUserInput g = do
         \exit                   exit\n"
       getUserInput g
 
-utf8Game :: Game -> String
-utf8Game (Game b (cur:turns)) = utf8Board b ++ "\nIt is " ++ teamName cur ++ "'s turn\n" ++ otherMessages
+utf8Game :: Game -> [Location]-> String
+utf8Game (Game b (cur:turns)) posMoves = utf8Board b posMoves ++ "\nIt is " ++ teamName cur ++ "'s turn\n" ++ otherMessages
   where
     g = Game b (cur:turns)
     otherMessages = ifStalemate ++ ifCheckmate ++ ifCurInCheck
@@ -87,28 +104,29 @@ utf8Game (Game b (cur:turns)) = utf8Board b ++ "\nIt is " ++ teamName cur ++ "'s
     ifCheckmate = if isCheckmate g then teamName cur ++ " is in checkmate!" ++ teamName (head turns) ++ " wins!\n" else ""
     ifCurInCheck = if isKingInCheck cur b 1 then teamName cur ++ " is in check!\n" else ""
 
-utf8Board :: Board -> String
-utf8Board (Board m c bs) = boardRows (Board m c bs) len hgt
+utf8Board :: Board -> [Location] -> String
+utf8Board (Board m c bs) posMoves = boardRows (Board m c bs) len hgt posMoves
   where
     locs = map fst (Map.toList m)
     (len,hgt) = maximum locs
 
-boardRows :: Board -> Int -> Int -> String
-boardRows _ _ (-1) = ""
-boardRows b l h = (boardRow b l h) ++ "\n" ++ boardRows b l (h - 1)
+boardRows :: Board -> Int -> Int -> [Location] -> String
+boardRows _ _ (-1) _ = ""
+boardRows b l h posMoves = (boardRow b l h posMoves) ++ "\n" ++ boardRows b l (h - 1) posMoves
 
-boardRow :: Board -> Int -> Int -> String
-boardRow b l y = boardSquare b 0 l y
+boardRow :: Board -> Int -> Int -> [Location] -> String
+boardRow b l y posMoves = boardSquare b 0 l y posMoves
 
-boardSquare :: Board -> Int -> Int -> Int -> String
-boardSquare b x maxX y =
+boardSquare :: Board -> Int -> Int -> Int -> [Location] -> String
+boardSquare b x maxX y posMoves =
   if x > maxX then
     ""
   else
-    (contents (fromRight piece)) ++ boardSquare b (x+1) maxX y
+    (contents (fromRight piece)) ++ boardSquare b (x+1) maxX y posMoves
   where
-    contents p -- =   -- "(" ++ (show x) ++ "," ++ (show y) ++ ") | "
-      | p == Nothing = "  ."
+    contents p
+      | p == Nothing = " • "
+      | (x,y) `elem` posMoves = ">" ++ [utf8Piece (fromJust p)] ++ "<"
       | otherwise = " " ++ [utf8Piece (fromJust p)] ++ " "
     piece = pieceAt (x,y) b
 
