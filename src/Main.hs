@@ -76,7 +76,13 @@ getUserInput g = do
               putStrLn (fromLeft pms)
               getUserInput g
             else do
-              putStrLn (utf8Game g targetLocs ++ "\n" ++ head mvs ++ " has " ++ show (length (fromRight pms)) ++ " possible moves.")
+              putStrLn (utf8Game g targetLocs
+                ++ "\n"
+                ++ head mv
+                ++ " has "
+                ++ show (length (fromRight pms))
+                ++ " possible moves.\n"
+                ++ show (map toAlgebraicLocation targetLocs))
               getUserInput g
     _ -> do
       putStrLn "Huh?"
@@ -125,10 +131,11 @@ boardSquare b x maxX y posMoves =
     (contents (fromRight piece)) ++ boardSquare b (x+1) maxX y posMoves
   where
     contents p
-      | p == Nothing = " • "
-      | (x,y) `elem` posMoves = ">" ++ [utf8Piece (fromJust p)] ++ "<"
-      | otherwise = " " ++ [utf8Piece (fromJust p)] ++ " "
+      | p == Nothing = lbord ++ "•" ++ rbord
+      | otherwise = lbord ++ [utf8Piece (fromJust p)] ++ rbord
     piece = pieceAt (x,y) b
+    lbord = if (x,y) `elem` posMoves then "▕" else " "
+    rbord = if (x,y) `elem` posMoves then "▏" else " "
 
 utf8Piece :: Piece -> Char
 utf8Piece (Piece (Team _ name) Pawn _) = 
