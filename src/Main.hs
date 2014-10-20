@@ -16,6 +16,18 @@ import Data.List.Split(splitOn)
 import Data.Either.Unwrap
 import Text.Regex.Posix
 
+playerMap :: Player p => Map.Map Team p
+playerMap = Map.fromList [(white,x),(black,y)]
+  where
+    x = ConsolePlayerx
+    y = ConsolePlayerx
+
+data ConsolePlayer = ConsolePlayerx
+
+instance Player ConsolePlayer where
+  makeMove p g = return Nothing
+
+
 main :: IO ()
 main = do
   putStrLn (utf8Game g [])

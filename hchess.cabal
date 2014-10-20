@@ -39,6 +39,7 @@ library
   exposed-modules:      Hchess
                         , Hchess.Board
                         , Hchess.Moves
+                        , Hchess.Bots
                         , Hchess.Game
   -- other-modules:
   -- other-extensions:

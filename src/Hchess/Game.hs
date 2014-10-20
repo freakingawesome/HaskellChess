@@ -8,6 +8,9 @@ import Data.Maybe
 
 data Game = Game Board [Team] deriving (Eq,Show)
 
+class Player p where
+  makeMove :: p -> Game -> IO (Maybe Move)
+
 newGame :: Int -> Int -> [(Team,String)] -> Game
 newGame _ _ [] = error "You must have at least two teams"
 newGame _ _ [t] = error "You must have at least two teams"
