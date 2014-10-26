@@ -8,7 +8,7 @@ import Data.Maybe
 
 data Game = Game Board [Player]  deriving (Eq,Show)
 
-type Mover = (Board -> [String] -> IO (Maybe ((Location,Location),Maybe Character)))
+type Mover = (Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character)))
 
 data Player = Player Team Mover
 
@@ -71,6 +71,18 @@ performMove (Game b players) (from,to) promo
     promoTarget = [ Move (from',to') b | Move (from',to') b <- fromRight pms,
       getCharacter (fromJust (fromRight (pieceAt to' b))) == fromJust promo ]
     
+play :: Game -> [String] -> IO String
+play (Game b ((Player t mover):players)) msgs = do
+  potMove <- mover b t msgs
+  if isNothing potMove then return $ (teamName t) ++ " is a LOSER"
+  else do
+    let
+      ((from,to),promo) = fromJust potMove
+      g = Game b ((Player t mover):players)
+      nextMove = performMove g (from,to) promo
+    if isLeft nextMove then play g [(fromLeft nextMove)]
+    else play (fromRight nextMove) []
+
 isStalemate :: Game -> Bool
 isStalemate (Game b ((Player t _):_)) = null (myPossibleMoves t b) && not (isKingInCheck t b 1)
 isStalemate _ = error "No teams specified"
