@@ -9,11 +9,11 @@ import Data.Either.Unwrap
 boardSize :: Board -> Int
 boardSize (Board x _ _) = Map.size x
 
-black :: Team
-black = Team South "Black"
+-- black :: Team
+-- black = Team South "Black"
 
-white :: Team
-white = Team North "White"
+-- white :: Team
+-- white = Team North "White"
 
 standardBoardPieceAt :: String -> Either String Square
 standardBoardPieceAt s = pieceAt (fromAlgebraicLocation s) (newStandardBoard white black)

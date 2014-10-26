@@ -33,41 +33,41 @@ spec = do
 
   describe "A new standard game" $ do
     it "errors out when moving from a non-existent square" $ do
-      performMove newStandardGame (loc "z3",loc "z4") Nothing `shouldBe` Left "Invalid location"
+      performMove newStandardNullMoverGame (loc "z3",loc "z4") Nothing `shouldBe` Left "Invalid location"
 
     it "errors out when moving from an empty square" $ do
-      performMove newStandardGame (loc "b4",loc "a4") Nothing `shouldBe` Left "The source square is empty"
+      performMove newStandardNullMoverGame (loc "b4",loc "a4") Nothing `shouldBe` Left "The source square is empty"
 
     it "only allows white to move first" $ do
-      performMove newStandardGame (loc "a7",loc "a6") Nothing `shouldBe` Left "It is not Black's turn"
+      performMove newStandardNullMoverGame (loc "a7",loc "a6") Nothing `shouldBe` Left "It is not Black's turn"
 
     it "should not allow an impossible move" $ do
-      performMove newStandardGame (loc "a2",loc "a5") Nothing `shouldBe` Left "Illegal move"
+      performMove newStandardNullMoverGame (loc "a2",loc "a5") Nothing `shouldBe` Left "Illegal move"
 
     it "should not allow an incapacitated piece to move" $ do
-      performMove newStandardGame (loc "a1",loc "a2") Nothing `shouldBe` Left "This piece is currently incapacitated"
+      performMove newStandardNullMoverGame (loc "a1",loc "a2") Nothing `shouldBe` Left "This piece is currently incapacitated"
 
     it "should allow a possible move" $ do
-      isRight (performMove newStandardGame (loc "a2",loc "a4") Nothing) `shouldBe` True
+      isRight (performMove newStandardNullMoverGame (loc "a2",loc "a4") Nothing) `shouldBe` True
 
     it "should not allow specification of a promotion character when it isn't applicable" $ do
-      performMove newStandardGame (loc "a2",loc "a4") (Just Queen) `shouldBe` Left "Promotion is not valid here"
+      performMove newStandardNullMoverGame (loc "a2",loc "a4") (Just Queen) `shouldBe` Left "Promotion is not valid here"
 
   describe "The game after the first white move" $ do
     let
-      Right g = performMove newStandardGame (loc "a2",loc "a4") Nothing
+      Right g = performMove newStandardNullMoverGame (loc "a2",loc "a4") Nothing
       Game b teams = g
       Right (Just (Piece t c _)) = pieceAt (loc "a4") b
 
     it "should now be black's move" $ do
-      head teams `shouldBe` black
+      head teams `shouldBe` blackPlayer
 
     it "should have the new board placement" $ do
-      (t,c) `shouldBe` (white,Pawn)
+      (t,c) `shouldBe` (playerTeam whitePlayer,Pawn)
 
   describe "A move requiring promotion" $ do
     let
-      g = newGame 8 8 [(white,"Ka1 pb7"),(black,"Kh7")]
+      g = newGame 8 8 [(whitePlayer,"Ka1 pb7"),(blackPlayer,"Kh7")]
     
     it "should require specification of a promotion character" $ do
       performMove g (loc "b7",loc "b8") Nothing `shouldBe` Left "You must specify a character for promotion"
@@ -83,21 +83,27 @@ spec = do
 
   describe "Checking for stalemate" $ do
     it "should not find a stalemate if it ain't so" $ do
-      isStalemate (newGame 8 8 [(white,"Ka1 pb7"),(black,"Kh7")]) `shouldBe` False
+      isStalemate (newGame 8 8 [(whitePlayer,"Ka1 pb7"),(blackPlayer,"Kh7")]) `shouldBe` False
 
     it "should find a stalemate if the current player can't move" $ do
-      isStalemate (newGame 8 8 [(white,"Kh8"),(black,"Kf7 Qg6")]) `shouldBe` True
+      isStalemate (newGame 8 8 [(whitePlayer,"Kh8"),(blackPlayer,"Kf7 Qg6")]) `shouldBe` True
 
   describe "Checking for checkmate" $ do
     let
-      cm = (newGame 8 8 [(white,"Kh8"),(black,"Kf7 Qh6")])
+      cm = (newGame 8 8 [(whitePlayer,"Kh8"),(blackPlayer,"Kf7 Qh6")])
 
     it "should not find a checkmate if it ain't so" $ do
-      isCheckmate (newGame 8 8 [(white,"Ka1 pb7"),(black,"Kh7")]) `shouldBe` False
+      isCheckmate (newGame 8 8 [(whitePlayer,"Ka1 pb7"),(blackPlayer,"Kh7")]) `shouldBe` False
 
     it "should find a checkmate if the current player can't move and king is in check" $ do
       isCheckmate cm `shouldBe` True
 
     it "should not count a checkmate as a stalemate" $ do
       isStalemate cm `shouldBe` False
+
+  where
+    whitePlayer = Player white nullMover
+    blackPlayer = Player black nullMover
+    nullMover = (\_ _ -> return Nothing)
+    newStandardNullMoverGame = newStandardGame nullMover nullMover
 

@@ -16,18 +16,20 @@ import Data.List.Split(splitOn)
 import Data.Either.Unwrap
 import Text.Regex.Posix
 
-playerMap :: Player p => Map.Map Team p
-playerMap = Map.fromList [(white,x),(black,y)]
-  where
-    x = ConsolePlayerx
-    y = ConsolePlayerx
+-- playerMap :: Player p => Map.Map Team p
+-- playerMap = Map.fromList [(white,x),(black,y)]
+  -- where
+    -- x = ConsolePlayerx
+    -- y = ConsolePlayerx
+-- 
+-- data ConsolePlayer = ConsolePlayerx
+-- 
+-- instance Player ConsolePlayer where
+  -- makeMove p g = return Nothing
 
-data ConsolePlayer = ConsolePlayerx
+main = putStrLn "hi"
 
-instance Player ConsolePlayer where
-  makeMove p g = return Nothing
-
-
+{-
 main :: IO ()
 main = do
   putStrLn (utf8Game g [])
@@ -106,9 +108,7 @@ getUserInput g = do
       putStrLn "\n\
         \When you see <loc>, use algebraic notation. For example, a1 is the lower left\n\
         \corner and h8 is the upper right.\n\n\
-        \pm <loc>               Shows possible move from location\n\
-        \mv <loc> <loc> [promo] Attempts to move the piece at the first loc to the second.\n\
-        \                       The promo field is only required for pawn promotion.\n\
+        \pm <loc>               Shows possible move from location\n\ \mv <loc> <loc> [promo] Attempts to move the piece at the first loc to the second.\n\ \                       The promo field is only required for pawn promotion.\n\
         \board                  Shows the board again.\n\
         \exit                   exit\n"
       getUserInput g
@@ -191,4 +191,5 @@ black = Team South "Black"
 
 white :: Team
 white = Team North "White"
+-}
 
