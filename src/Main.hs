@@ -16,10 +16,21 @@ import Data.List.Split(splitOn)
 import Data.Either.Unwrap
 import Text.Regex.Posix
 
-main = 
-  play g []
+main = do
+  endgame <- play g []
+  putStrLn endgame
+  return ()
   where
-    g = newStandardGame consoleMover consoleMover
+    g = newStandardGame consoleMover firstPossibleMover
+-- newGame 8 8 [(Player whiteTeam consoleMover,"Ka1 Qa8 Rh1"),(Player blackTeam firstPossibleMover,"Kh7")]
+
+firstPossibleMover :: Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character))
+firstPossibleMover b t _ =
+  return (if null posMoves then Nothing else (Just ((from,to),Nothing))) -- doesn't handle promotion
+  where
+    posMoves = myPossibleMoves t b
+    Move (from,to) _ = head posMoves
+
 
 consoleMover :: Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character))
 consoleMover b t msgs = do
@@ -171,9 +182,9 @@ utf8Piece (Piece (Team _ name) King _) =
     "Black" -> '♚'
     _ -> 'K'
 
-black :: Team
-black = Team South "Black"
+blackTeam :: Team
+blackTeam = Team South "Black"
 
-white :: Team
-white = Team North "White"
+whiteTeam :: Team
+whiteTeam = Team North "White"
 

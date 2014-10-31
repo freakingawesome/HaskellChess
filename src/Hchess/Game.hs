@@ -5,6 +5,7 @@ import Hchess.Moves
 import qualified Data.Map as Map
 import Data.Either.Unwrap
 import Data.Maybe
+import Data.List(intercalate)
 
 data Game = Game Board [Player]  deriving (Eq,Show)
 
@@ -73,15 +74,36 @@ performMove (Game b players) (from,to) promo
     
 play :: Game -> [String] -> IO String
 play (Game b ((Player t mover):players)) msgs = do
+  let
+    turnsToTeams' = turnsToTeams (map playerTeam players)
   potMove <- mover b t msgs
-  if isNothing potMove then return $ (teamName t) ++ " is a LOSER"
+  if isNothing potMove then
+    return $ intercalate "\n" (boardMessages b turnsToTeams' ++ [(teamName t) ++ " is a LOSER"])
   else do
     let
       ((from,to),promo) = fromJust potMove
       g = Game b ((Player t mover):players)
-      nextMove = performMove g (from,to) promo
-    if isLeft nextMove then play g [(fromLeft nextMove)]
-    else play (fromRight nextMove) []
+      nextGame = performMove g (from,to) promo
+    if isLeft nextGame then
+      -- means there was a problem and the returned string is the error msg
+      play g (msgs ++ [(fromLeft nextGame)])
+    else
+      let
+        Game nextBoard _ = fromRight nextGame
+        boardMessages' = boardMessages nextBoard turnsToTeams'
+      in
+        play (fromRight nextGame) boardMessages'
+
+boardMessages :: Board -> [Team] -> [String]
+boardMessages b [] = []
+boardMessages b (t:teams) =
+  filter (not.null) ([ifStalemate,ifCheckmate,ifCurInCheck] ++ boardMessages b teams)
+  where
+    isStalemate' = null (myPossibleMoves t b) && not (isKingInCheck t b 1)
+    isCheckmate' = null (myPossibleMoves t b) && isKingInCheck t b 1
+    ifStalemate = if isStalemate' then teamName t ++ " is in stalemate!" else ""
+    ifCheckmate = if isCheckmate' then teamName t ++ " is in checkmate!" else ""
+    ifCurInCheck = if not isCheckmate' && isKingInCheck t b 1 then teamName t ++ " is in check!" else ""
 
 isStalemate :: Game -> Bool
 isStalemate (Game b ((Player t _):_)) = null (myPossibleMoves t b) && not (isKingInCheck t b 1)
