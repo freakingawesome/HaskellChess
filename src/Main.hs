@@ -17,12 +17,11 @@ import Data.Either.Unwrap
 import Text.Regex.Posix
 
 main = do
-  endgame <- play g []
+  endgame <- play newStandardGame moverMap []
   putStrLn endgame
   return ()
   where
-    g = newStandardGame consoleMover firstPossibleMover
--- newGame 8 8 [(Player whiteTeam consoleMover,"Ka1 Qa8 Rh1"),(Player blackTeam firstPossibleMover,"Kh7")]
+    moverMap = Map.fromList [(whiteTeam,consoleMover),(blackTeam,firstPossibleMover)]
 
 firstPossibleMover :: Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character))
 firstPossibleMover b t _ =
