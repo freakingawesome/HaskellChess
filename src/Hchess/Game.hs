@@ -13,7 +13,7 @@ type Mover = (Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe 
 
 newGame :: Int -> Int -> [(Team,String)] -> Game
 newGame _ _ [] = error "You must have at least two teams"
-newGame _ _ [t] = error "You must have at least two teams"
+newGame _ _ [_] = error "You must have at least two teams"
 newGame w h teamPlacement =
   Game (newBoard w h teamPlacement) (getTurns (map fst teamPlacement))
 
@@ -64,10 +64,10 @@ play (Game b (t:teams)) moverMap msgs = do
   let
     turnsToTeams' = turnsToTeams teams
     maybeMover = Map.lookup t moverMap
-    mover = if isNothing maybeMover then error ("No mover for team " ++ show t) else fromJust maybeMover
+    mover = fromMaybe (error ("No mover for team " ++ show t)) maybeMover
   potMove <- mover b t msgs
   if isNothing potMove then
-    return $ intercalate "\n" (boardMessages b turnsToTeams' ++ [(teamName t) ++ " is a LOSER"])
+    return $ intercalate "\n" (boardMessages b turnsToTeams' ++ [teamName t ++ " is a LOSER"])
   else do
     let
       ((from,to),promo) = fromJust potMove
@@ -75,7 +75,7 @@ play (Game b (t:teams)) moverMap msgs = do
       nextGame = performMove g (from,to) promo
     if isLeft nextGame then
       -- means there was a problem and the returned string is the error msg
-      play g moverMap (msgs ++ [(fromLeft nextGame)])
+      play g moverMap (msgs ++ [fromLeft nextGame])
     else
       let
         Game nextBoard _ = fromRight nextGame

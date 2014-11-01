@@ -1,21 +1,19 @@
 module Main where
 
--- import Data.Map (fromList)
 import qualified Data.Map as Map
--- import Data.Either.Unwrap
-import Data.Maybe
 import Safe
 
 import Hchess.Board
 import Hchess.Moves
 import Hchess.Game
 
-import Data.Maybe(fromJust)
-import Data.List(sort,intercalate)
+import Data.Maybe
+import Data.List(intercalate)
 import Data.List.Split(splitOn)
 import Data.Either.Unwrap
 import Text.Regex.Posix
 
+main :: IO ()
 main = do
   endgame <- play newStandardGame moverMap []
   putStrLn endgame
@@ -25,7 +23,7 @@ main = do
 
 firstPossibleMover :: Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character))
 firstPossibleMover b t _ =
-  return (if null posMoves then Nothing else (Just ((from,to),Nothing))) -- doesn't handle promotion
+  return (if null posMoves then Nothing else Just ((from,to),Nothing)) -- doesn't handle promotion
   where
     posMoves = myPossibleMoves t b
     Move (from,to) _ = head posMoves
@@ -54,13 +52,12 @@ getUserInput b t = do
     "mv" ->
       let
         (_,_,_,mvs) = input =~ "^mv ([a-h][1-8]) ([a-h][1-8])( [a-zA-Z]+)?$" :: (String,String,String,[String])
-      in do
-      if null mvs then do
+      in if null mvs then do
         putStrLn "Parse error. Should be something like: mv a2 a3"
         getUserInput b t
       else
         let
-          (from,to,promoText) = (fromAlgebraicLocation (head mvs),fromAlgebraicLocation (mvs!!1),mvs!!2)
+          (from,to,_) = (fromAlgebraicLocation (head mvs),fromAlgebraicLocation (mvs!!1),mvs!!2)
         in
           let
             promo = readMay (mvs!!2) :: Maybe Character
@@ -69,28 +66,27 @@ getUserInput b t = do
     "pm" ->
       let
         (_,_,_,mvs) = input =~ "^pm ([a-h][1-8])$" :: (String,String,String,[String])
-      in do
-        if length mvs /= 1 then do
-          putStrLn "Parse error. Should be something like: pm a2"
-          getUserInput b t
-        else
-          let
-            from = fromAlgebraicLocation (head mvs)
-            pms = possibleMovesFromLocation b from 1
-            targetLocs = map (\(Move (_,to) _) -> to) (fromRight pms)
-          in
-            if isLeft pms then do
-              putStrLn (fromLeft pms)
-              getUserInput b t
-            else do
-              putStrLn (utf8Board b targetLocs
-                ++ "\n"
-                ++ head mvs
-                ++ " has "
-                ++ show (length (fromRight pms))
-                ++ " possible moves.\n"
-                ++ show (map toAlgebraicLocation targetLocs))
-              getUserInput b t
+      in if length mvs /= 1 then do
+        putStrLn "Parse error. Should be something like: pm a2"
+        getUserInput b t
+      else
+        let
+          from = fromAlgebraicLocation (head mvs)
+          pms = possibleMovesFromLocation b from 1
+          targetLocs = map (\(Move (_,to) _) -> to) (fromRight pms)
+        in
+          if isLeft pms then do
+            putStrLn (fromLeft pms)
+            getUserInput b t
+          else do
+            putStrLn (utf8Board b targetLocs
+              ++ "\n"
+              ++ head mvs
+              ++ " has "
+              ++ show (length (fromRight pms))
+              ++ " possible moves.\n"
+              ++ show (map toAlgebraicLocation targetLocs))
+            getUserInput b t
     _ -> do
       putStrLn "Huh?"
       getUserInput b t
@@ -107,27 +103,27 @@ getUserInput b t = do
       getUserInput b t
 
 utf8Board :: Board -> [Location] -> String
-utf8Board (Board m c bs) posMoves = boardRows (Board m c bs) len hgt posMoves
+utf8Board (Board m c bs) = boardRows (Board m c bs) len hgt
   where
     locs = map fst (Map.toList m)
     (len,hgt) = maximum locs
 
 boardRows :: Board -> Int -> Int -> [Location] -> String
 boardRows _ _ (-1) _ = ""
-boardRows b l h posMoves = (boardRow b l h posMoves) ++ "\n" ++ boardRows b l (h - 1) posMoves
+boardRows b l h posMoves = boardRow b l h posMoves ++ "\n" ++ boardRows b l (h - 1) posMoves
 
 boardRow :: Board -> Int -> Int -> [Location] -> String
-boardRow b l y posMoves = boardSquare b 0 l y posMoves
+boardRow b = boardSquare b 0
 
 boardSquare :: Board -> Int -> Int -> Int -> [Location] -> String
 boardSquare b x maxX y posMoves =
   if x > maxX then
     ""
   else
-    (contents (fromRight piece)) ++ boardSquare b (x+1) maxX y posMoves
+    contents (fromRight piece) ++ boardSquare b (x+1) maxX y posMoves
   where
     contents p
-      | p == Nothing = lbord ++ "•" ++ rbord
+      | isNothing p = lbord ++ "•" ++ rbord
       | otherwise = lbord ++ [utf8Piece (fromJust p)] ++ rbord
     piece = pieceAt (x,y) b
     lbord = if (x,y) `elem` posMoves then "▕" else " "
