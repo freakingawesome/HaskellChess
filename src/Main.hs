@@ -107,17 +107,6 @@ getUserInput b t = do
         \exit                   exit\n"
       getUserInput b t
 
-{-
-utf8Game :: Game -> [Location]-> String
-utf8Game (Game b (cur:turns)) posMoves = utf8Board b posMoves ++ "\nIt is " ++ teamName cur ++ "'s turn\n" ++ otherMessages
-  where
-    g = Game b (cur:turns)
-    otherMessages = ifStalemate ++ ifCheckmate ++ ifCurInCheck
-    ifStalemate = if isStalemate g then teamName cur ++ " is in stalemate!\n" else ""
-    ifCheckmate = if isCheckmate g then teamName cur ++ " is in checkmate! " ++ teamName (head turns) ++ " wins!\n" else ""
-    ifCurInCheck = if not (isCheckmate g) && isKingInCheck cur b 1 then teamName cur ++ " is in check!\n" else ""
--}
-
 utf8Board :: Board -> [Location] -> String
 utf8Board (Board m c bs) posMoves = boardRows (Board m c bs) len hgt posMoves
   where
