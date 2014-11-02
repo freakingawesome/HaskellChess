@@ -6,6 +6,7 @@ import Safe
 import Hchess.Board
 import Hchess.Moves
 import Hchess.Game
+import Hchess.Bots
 
 import Data.Maybe
 import Data.List(intercalate)
@@ -19,15 +20,7 @@ main = do
   putStrLn endgame
   return ()
   where
-    moverMap = Map.fromList [(whiteTeam,consoleMover),(blackTeam,firstPossibleMover)]
-
-firstPossibleMover :: Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character))
-firstPossibleMover b t _ =
-  return (if null posMoves then Nothing else Just ((from,to),Nothing)) -- doesn't handle promotion
-  where
-    posMoves = myPossibleMoves t b
-    Move (from,to) _ = head posMoves
-
+    moverMap = Map.fromList [(whiteTeam,consoleMover),(blackTeam,firstPossibleMoverBot)]
 
 consoleMover :: Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character))
 consoleMover b t msgs = do
