@@ -20,7 +20,7 @@ main = do
   putStrLn endgame
   return ()
   where
-    moverMap = Map.fromList [(whiteTeam,consoleMover),(blackTeam,firstPossibleMoverBot)]
+    moverMap = Map.fromList [(whiteTeam,consoleMover),(blackTeam,randomMoverBot)]
 
 consoleMover :: Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character))
 consoleMover b t msgs = do
