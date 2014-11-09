@@ -429,6 +429,30 @@ spec = do
     it "should move the right rook when castling right" $ do
       fromRight (pieceAt (loc "e1") bRight) `shouldBe` Just (Piece white Rook [loc "h1"])
 
+  describe "The resulting board from castling on the black team" $ do
+    let
+      b = b8x8 [(white,"Qc6 Qf6"),(black,"Kd8 Ra8 Rh8 pa7 pb7 pc7 pd7 pe7 pf7 pg7 ph7")]
+      Move (_,_) bLeft = move b (loc "d8",loc "f8")
+      Move (_,_) bRight = move b (loc "d8",loc "b8")
+
+    it "should result in the castle jumping to the expected square when castling left" $ do
+      fromRight (pieceAt (loc "f8") bLeft) `shouldBe` Just (Piece black King [loc "d8"])
+
+    it "should result in an empty square where the left rook was at" $ do
+      fromRight (pieceAt (loc "h8") bLeft) `shouldBe` Nothing
+
+    it "should result in an non-empty square where the right rook was at" $ do
+      fromRight (pieceAt (loc "a8") bLeft) `shouldBe` Just (Piece black Rook [])
+
+    it "should move the left rook when castling left" $ do
+      fromRight (pieceAt (loc "e8") bLeft) `shouldBe` Just (Piece black Rook [loc "h8"])
+
+    it "should result in the castle jumping to the expected square when castling right" $ do
+      fromRight (pieceAt (loc "b8") bRight) `shouldBe` Just (Piece black King [loc "d8"])
+
+    it "should move the right rook when castling right" $ do
+      fromRight (pieceAt (loc "c8") bRight) `shouldBe` Just (Piece black Rook [loc "a8"])
+
   describe "Pawn promotion" $ do
     let
       ms = fromRight (stdPossibleMoves [(white,"pd7")] "d7")
@@ -482,6 +506,19 @@ spec = do
 
       it "should have a clear line of site to the right Rook" $ do
         toTheRight `shouldBe` ["e1", "f1", "g1", "h1"]
+
+  describe "Castling helpers for black" $ do
+    describe "Calculating the line of site from a standard black king" $ do
+      let
+        b = b8x8 [(white,"Qc6 Qf6"),(black,"Kd8 Ra8 Rh8 pa7 pb7 pc7 pd7 pe7 pf7 pg7 ph7")]
+        toTheLeft = alglocs (lineOfSightEndingInUnmovedTeamRook b black (loc "d8") (-1,0))
+        toTheRight = alglocs (lineOfSightEndingInUnmovedTeamRook b black (loc "d8") (1,0))
+
+      it "should have a clear line of site to the left Rook" $ do
+        toTheLeft `shouldBe` ["e8", "f8", "g8", "h8"]
+
+      it "should have a clear line of site to the right Rook" $ do
+        toTheRight `shouldBe` ["c8", "b8", "a8"]
 
   describe "My possible moves" $ do
     let

@@ -197,10 +197,10 @@ move (Board m capt bs) (from,to) = Move (from,to) b''''
       where
         isCastling horizJump =
           moverChar fromPiece == King
-          && fst to - fst from == horizJump
+          && relLoc from (getAffinity (getTeam fromPiece)) (horizJump,0) == to
         locOfCastlingRook sign = (
           last (lineOfSightEndingInUnmovedTeamRook initialBoard (getTeam fromPiece) from (sign,0)),
-          (fst from + sign,snd from))
+          relLoc from (getAffinity (getTeam fromPiece)) (sign,0))
 
 pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
 pickUpPiece (Board m capt bs) l = (Board (Map.update removePiece l m) capt bs, p')

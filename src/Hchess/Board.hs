@@ -56,7 +56,7 @@ placePiece (Board m capt bs) (x,y) p =
       if isNothing val then 
         Just (Just p) 
       else 
-        error "Square is already occupied"
+        error $ "Square " ++ toAlgebraicLocation (x,y) ++ " is already occupied"
   in Board (Map.update insertOrFail (x,y) m) capt bs
 
 newStandardBoard :: Team -> Team -> Board
@@ -106,4 +106,7 @@ teamName (Team _ name) = name
 
 getCharacter :: Piece -> Character
 getCharacter (Piece _ c _) = c
+
+getAffinity :: Team -> Affinity
+getAffinity (Team a _) = a
 
