@@ -5,7 +5,7 @@ import qualified Data.Map as Map
 import Data.Either.Unwrap
 import Data.Maybe
 
-data Move = Move (Location,Location) Board deriving (Show,Eq)
+data Move = Move (Location,Location) Board deriving (Show,Read,Eq)
 
 getBoardFromMove :: Move -> Board
 getBoardFromMove (Move (_,_) b) = b

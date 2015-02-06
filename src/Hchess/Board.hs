@@ -12,17 +12,17 @@ data Character =
 
 data Affinity = 
   North | East | South | West
-  deriving (Show,Eq,Ord)
+  deriving (Show,Read,Eq,Ord)
 
 data Team = 
   Team Affinity String 
-  deriving (Show,Eq,Ord)
+  deriving (Show,Read,Eq,Ord)
 
 type Location = (Int,Int)
 
 data Piece = 
   Piece Team Character [Location]
-  deriving (Show,Eq)
+  deriving (Show,Read,Eq)
 
 type CapturedPieceMap = Map.Map Team [Piece]
 
@@ -30,7 +30,7 @@ type Square = Maybe Piece
 
 data Board = 
   Board (Map.Map Location Square) CapturedPieceMap [Board]
-  deriving (Show,Eq)
+  deriving (Show,Read,Eq)
 
 emptyBoard :: Int -> Int -> Board
 emptyBoard w h = 
