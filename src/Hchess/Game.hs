@@ -33,7 +33,7 @@ performMove (Game b teams) (from,to) promo
   | isLeft fromContents = Left "Invalid location"
   | isNothing fromSquare = Left "The source square is empty"
   | fromTeam /= currentTeam (Game b teams) = Left $ "It is not " ++ teamName fromTeam ++ "'s turn"
-  | isLeft pms = Left "Illegal move" 
+  | isLeft pms = Left "Illegal move"
   | null possibleTargetLocs = Left "This piece is currently incapacitated"
   | to `notElem` possibleTargetLocs = Left "Illegal move"
   | length targetMoves == 1 =
@@ -52,14 +52,14 @@ performMove (Game b teams) (from,to) promo
   where
     fromContents = pieceAt from b
     fromSquare = fromRight fromContents
-    pms = possibleMovesFromLocation b from (length (remainingTeams b)) 
+    pms = possibleMovesFromLocation b from (length (remainingTeams b))
     possibleTargetLocs = map (\(Move (_,to') _) -> to') (fromRight pms)
     fromTeam = getTeam (fromJust fromSquare)
     targetMoves = [ Move (from',to') b | Move (from',to') b <- fromRight pms, to' == to ]
     commitMove mv = Game (getBoardFromMove mv) (tail teams)
     promoTarget = [ Move (from',to') b | Move (from',to') b <- fromRight pms,
       getCharacter (fromJust (fromRight (pieceAt to' b))) == fromJust promo ]
-    
+
 play :: Game -> Map.Map Team Mover -> [String] -> IO String
 play (Game b (t:teams)) moverMap msgs = do
   let
@@ -110,10 +110,10 @@ getTurns x = x ++ getTurns x
 turnsToTeams :: Ord x => [x] -> [x]
 turnsToTeams [] = []
 turnsToTeams (x:xs) = x : turnsToTeams' xs
-  where 
+  where
     turnsToTeams' (x':xs')
       | x' == x = []
-      | otherwise = x' : turnsToTeams' xs' 
+      | otherwise = x' : turnsToTeams' xs'
 
 teamCount :: Ord x => [x] -> Int
 teamCount x = length (turnsToTeams x)
