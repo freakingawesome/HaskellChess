@@ -30,6 +30,7 @@ executable hchess
   build-depends: base ==4.6.*, Cabal >= 1.16.0 
                , hchess
                , containers
+               , unordered-containers
                , split
                , either-unwrap
                , regex-posix
@@ -46,6 +47,7 @@ library
   -- other-extensions:
   build-depends:        base >=4.6 && <4.7,
                         containers,
+                        unordered-containers,
                         split,
                         either-unwrap,
                         random
@@ -63,6 +65,7 @@ test-suite spec
                , hspec >= 1.3 
                , hchess
                , containers
+               , unordered-containers
                , split
                , either-unwrap
 

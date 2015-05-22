@@ -5,6 +5,7 @@ import Data.Char (chr,ord)
 import Data.List (sort,nub)
 import Data.List.Split (splitOn)
 import Data.Maybe
+import qualified Data.HashSet as HS
 
 data Character =
   Pawn | Rook | Knight | Bishop | Queen | King
@@ -27,6 +28,19 @@ data Piece =
 type CapturedPieceMap = Map.Map Team [Piece]
 
 type Square = Maybe Piece
+
+type EnPassantTarget = Maybe Location
+
+newtype CastlingRookAvailability = CastlingRookAvailability (HS.HashSet Location)
+
+instance Read CastlingRookAvailability where
+  readsPrec s = CastlingRookAvailability $ HS.fromList $ read s :: [Location]
+
+instance Eq CastlingRookAvailability where
+  (CastlingRookAvailability a) == (CastlingRookAvailability b) = (sort . HS.toList) a == (sort . HS.toList) b
+
+instance Show CastlingRookAvailability where
+  show (CastlingRookAvailability a) = show $ HS.toList a
 
 data Board =
   Board (Map.Map Location Square) CapturedPieceMap [Board]
