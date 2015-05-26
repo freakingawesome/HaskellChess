@@ -7,7 +7,7 @@ import Data.List(sort)
 import Data.Either.Unwrap
 
 boardSize :: Board -> Int
-boardSize (Board x _ _) = Map.size x
+boardSize b = Map.size (squares b)
 
 -- black :: Team
 -- black = Team South "Black"
@@ -27,28 +27,19 @@ stdPossibleMoves ts al = stdPossibleMovesFromBoard (b8x8 ts) al
 stdPossibleMovesFromBoard :: Board -> String -> Either String [Move]
 stdPossibleMovesFromBoard b al = possibleMovesFromLocation b (fromAlgebraicLocation al) 1
 
-stdPossibleMovesWithHistory :: [(Team,String)] -> [(String,[String])] -> String -> Either String [Move]
-stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al) 1
+-- stdPossibleMovesWithHistory :: [(Team,String)] -> [(String,[String])] -> String -> Either String [Move]
+-- stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al) 1
 
 getBoard :: Move -> Board
 getBoard (Move _ b) = b
 
-getMap :: Board -> Map.Map Location Square
-getMap (Board m _ _) = m
-
 pieceCount :: Board -> Int
-pieceCount b = Map.size (Map.filter (\x -> x /= Nothing) (getMap b)) 
-
-getCaptures :: Board -> CapturedPieceMap
-getCaptures (Board _ capt _) = capt
+pieceCount b = Map.size (Map.filter (\x -> x /= Nothing) (squares b))
 
 getTargetLocationsFromMoves :: Either String [Move] -> [Location]
 getTargetLocationsFromMoves (Right []) = []
 getTargetLocationsFromMoves (Left _) = []
 getTargetLocationsFromMoves (Right (Move (_,to) _:ls)) = to : getTargetLocationsFromMoves (Right ls)
-
-getBoardHistory :: Board -> [Board]
-getBoardHistory (Board _ _ hist) = hist
 
 getBoardFromPossibleMoves :: Either String [Move] -> (Location,Location) -> Board
 getBoardFromPossibleMoves pm ls = getBoard (head (filter (\(Move m _) -> m == ls) (fromRight pm)))
@@ -72,11 +63,11 @@ alglocs :: [Location] -> [String]
 alglocs [] = []
 alglocs (x:xs) = algloc x : alglocs xs
 
-injectBoardHistory :: Board -> [(String,[String])] -> Board
-injectBoardHistory b [] = b
-injectBoardHistory (Board m capt bs) ((al,hist):hs) = 
-  let updateOrFail p = if p == Nothing then error "Invalid location" else Just (Just (injectPieceHistory (fromJust p) hist))
-  in injectBoardHistory (Board (Map.update updateOrFail (loc al) m) capt bs) hs 
+-- injectBoardHistory :: Board -> [(String,[String])] -> Board
+-- injectBoardHistory b [] = b
+-- injectBoardHistory (Board m capt bs) ((al,hist):hs) =
+  -- let updateOrFail p = if p == Nothing then error "Invalid location" else Just (Just (injectPieceHistory (fromJust p) hist))
+  -- in injectBoardHistory (Board (Map.update updateOrFail (loc al) m) capt bs) hs
 
 injectPieceHistory :: Piece -> [String] -> Piece
 injectPieceHistory (Piece t c _) hs = Piece t c (locs hs)

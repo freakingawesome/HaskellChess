@@ -7,8 +7,7 @@ import Data.Either.Unwrap
 import Data.Maybe
 import Data.List(intercalate)
 
-data Game = Game Board [Team]  deriving (Eq,Show,Read)
-data SerializableGame = SerializableGame Board [Team]  deriving (Eq,Show,Read)
+data Game = Game Board [Team]  deriving (Eq,Show)
 
 type Mover = (Board -> Team -> [String] -> IO (Maybe ((Location,Location),Maybe Character)))
 
@@ -129,10 +128,10 @@ currentTeam :: Game -> Team
 currentTeam (Game _ []) = error "No teams defined"
 currentTeam (Game _ (t:_)) = t
 
-simpleSerializeGame :: Game -> String
-simpleSerializeGame (Game b t) = show (SerializableGame b (turnsToTeams t))
-
-simpleDeserializeGame :: String -> Game
-simpleDeserializeGame s = Game b (getTurns t)
-  where (SerializableGame b t) = read s :: SerializableGame
-
+-- simpleSerializeGame :: Game -> String
+-- simpleSerializeGame (Game b t) = show (SerializableGame b (turnsToTeams t))
+--
+-- simpleDeserializeGame :: String -> Game
+-- simpleDeserializeGame s = Game b (getTurns t)
+  -- where (SerializableGame b t) = read s :: SerializableGame
+--

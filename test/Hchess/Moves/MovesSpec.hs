@@ -13,7 +13,7 @@ spec = do
   describe "A white pawn on a standard board at d2" $ do
     it "can move to either d3 or d4 if isolated" $ do
       moveTargets (stdPossibleMoves [(white,"pd2")] "d2") `shouldBe` ["d3", "d4"]
-     
+
     it "can move to only d3 if d4 is occupied by a teammate" $ do
       moveTargets (stdPossibleMoves [(white,"pd2 pd4")] "d2") `shouldBe` ["d3"]
 
@@ -28,38 +28,38 @@ spec = do
 
     it "can move forward diagonally if occupied by enemies" $ do
       moveTargets (stdPossibleMoves [(white,"pd2 Kh1"),(black,"pc3 pe3 Kh8")] "d2") `shouldBe` ["c3", "d3", "d4", "e3"]
-      
+
     it "cannot move forward diagonally if occupied by teammates" $ do
       moveTargets (stdPossibleMoves [(white,"pd2 pc3 pe3")] "d2") `shouldBe` ["d3", "d4"]
-      
-  describe "A white pawn on a standard board at d3" $ do
-    it "can move to only d4 if isolated" $ do 
-      moveTargets (stdPossibleMovesWithHistory [(white,"pd3")] [("d3",["d2"])] "d3") `shouldBe` ["d4"]
- 
-  describe "A black pawn on a standard board at d6" $ do
-    it "can move to only d5 if isolated" $ do
-      moveTargets (stdPossibleMovesWithHistory [(black,"pd6")] [("d6",["d7"])] "d6") `shouldBe` ["d5"]
-  
-  describe "Some internal tests of helper functions" $ do
-    it "should be able to inject a piece's history" $ do
-      injectPieceHistory (Piece black Pawn []) ["a1","b2"] `shouldBe` Piece black Pawn (locs ["a1","b2"])
+
+  -- describe "A white pawn on a standard board at d3" $ do
+    -- it "can move to only d4 if isolated" $ do
+      -- moveTargets (stdPossibleMovesWithHistory [(white,"pd3")] [("d3",["d2"])] "d3") `shouldBe` ["d4"]
+ --
+  -- describe "A black pawn on a standard board at d6" $ do
+    -- it "can move to only d5 if isolated" $ do
+      -- moveTargets (stdPossibleMovesWithHistory [(black,"pd6")] [("d6",["d7"])] "d6") `shouldBe` ["d5"]
+  --
+  -- describe "Some internal tests of helper functions" $ do
+    -- it "should be able to inject a piece's history" $ do
+      -- injectPieceHistory (Piece black Pawn []) ["a1","b2"] `shouldBe` Piece black Pawn (locs ["a1","b2"])
 
   describe "A super tiny board" $ do
     it "should not allow pawns moving off the edge if below absolute north" $ do
       moveTargets (possibleMovesFromLocation (newBoard 2 2 [(white,"pa1")]) (loc "a1") 1) `shouldBe` replicate 4 "a2" -- 4 because of pawn promotion
- 
+
     it "should not allow pawns moving off the edge if at absolute north" $ do
       possibleMovesFromLocation (newBoard 2 2 [(white,"pa2")]) (loc "a2") 1 `shouldBe` Right []
-  
+
   describe "The board after a threatened pawn moves" $ do
     let b = b8x8 [(white,"pd2"),(black,"pe3")]
 
     describe "when a pawn moves without capturing" $ do
-      let 
+      let
         m = move b (loc "d2",loc "d3")
         b' = getBoard m
-      it "should have no captures" $ do
-        getCaptures b' `shouldBe` Map.empty
+      -- it "should have no captures" $ do
+        -- getCaptures b' `shouldBe` Map.empty
 
       it "should have no piece at d2" $ do
         pieceAt (loc "d2") b' `shouldBe` Right Nothing
@@ -69,20 +69,20 @@ spec = do
         m = move b (loc "d2",loc "e3")
         b' = getBoard m
 
-      it "make sure the original board has no captures" $ do
-        Map.lookup white (getCaptures b) `shouldBe` Nothing
+      -- it "make sure the original board has no captures" $ do
+        -- Map.lookup white (getCaptures b) `shouldBe` Nothing
 
-      it "should have one capture" $ do
-        Map.lookup white (getCaptures b') `shouldBe` Just ([Piece black Pawn [loc "e3"]])
+      -- it "should have one capture" $ do
+        -- Map.lookup white (getCaptures b') `shouldBe` Just ([Piece black Pawn [loc "e3"]])
 
       it "should move the original piece to the target location" $ do
         fromRight (pieceAt (loc "e3") b') `shouldBe` Just (Piece white Pawn [loc "d2"])
 
-      it "the new board should have the original board in its history" $ do
-        getBoardHistory b' `shouldBe` [b]
+      -- it "the new board should have the original board in its history" $ do
+        -- getBoardHistory b' `shouldBe` [b]
 
-  describe "Picking up the last piece on a board" $ do 
-    let 
+  describe "Picking up the last piece on a board" $ do
+    let
       b = b8x8 [(white,"pd2")]
       (b',p') = pickUpPiece b (loc "d2")
 
@@ -92,8 +92,8 @@ spec = do
     it "should give me back my pawn with its last recorded location" $ do
       p' `shouldBe` Just (Piece white Pawn [loc "d2"])
 
-  describe "Picking up a piece from a new board" $ do 
-    let 
+  describe "Picking up a piece from a new board" $ do
+    let
       b = newStandardBoard white black
       (b',p') = pickUpPiece b (loc "e1")
 
@@ -116,21 +116,21 @@ spec = do
       pickUpPiece b (loc "e3") `shouldBe` (b,Nothing)
 
   describe "Recording a capture" $ do
-    let 
+    let
       b = b8x8 [(white,"pd2"),(black,"pe3 pc3")]
       b' = recordCapture b white (fromRight (pieceAt (loc "e3") b))
 
     it "should return the same board if no piece is captured" $ do
       recordCapture b white Nothing `shouldBe` b
 
-    it "should add a team if it doesn't exist" $ do
-      Map.toList (getCaptures b') `shouldBe` [(white,[Piece black Pawn []])]
+    -- it "should add a team if it doesn't exist" $ do
+      -- Map.toList (getCaptures b') `shouldBe` [(white,[Piece black Pawn []])]
 
-    it "should append to an existing team's list of captured pieces" $ do
-      let
-        b'' = recordCapture b' white (fromRight (pieceAt (loc "c3") b'))
-        blackPawn = Piece black Pawn []
-      Map.toList (getCaptures b'') `shouldBe` [(white,[blackPawn,blackPawn])]
+    -- it "should append to an existing team's list of captured pieces" $ do
+      -- let
+        -- b'' = recordCapture b' white (fromRight (pieceAt (loc "c3") b'))
+        -- blackPawn = Piece black Pawn []
+      -- Map.toList (getCaptures b'') `shouldBe` [(white,[blackPawn,blackPawn])]
 
   describe "En passant" $ do
     describe "on a board where black can perform en passant on the right" $ do
@@ -143,18 +143,18 @@ spec = do
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "a3"]
 
-      it "the second new board should have the original and first boards in its history" $ do
-        getBoardHistory b'' `shouldBe` [b,b']
+      -- it "the second new board should have the original and first boards in its history" $ do
+        -- getBoardHistory b'' `shouldBe` [b,b']
 
       describe "the resulting board" $ do
         let
           possibleBoard = getBoardFromPossibleMoves pm (loc "b4",loc "a3")
-      
+
         it "should be missing the captured piece" $ do
           pieceAt (loc "a4") possibleBoard `shouldBe` Right Nothing
 
-        it "should have the missing pawn in the captured list" $ do
-          getCaptures possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "a2",loc "a4"]])]
+        -- it "should have the missing pawn in the captured list" $ do
+          -- getCaptures possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "a2",loc "a4"]])]
 
     describe "on a board where black can perform en passant on the left" $ do
       let
@@ -166,18 +166,18 @@ spec = do
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "c3"]
 
-      it "the second new board should have the original and first boards in its history" $ do
-        getBoardHistory b'' `shouldBe` [b,b']
+      -- it "the second new board should have the original and first boards in its history" $ do
+        -- getBoardHistory b'' `shouldBe` [b,b']
 
       describe "the resulting board" $ do
         let
           possibleBoard = getBoardFromPossibleMoves pm (loc "b4",loc "c3")
-      
+
         it "should be missing the captured piece" $ do
           pieceAt (loc "c4") possibleBoard `shouldBe` Right Nothing
 
-        it "should have the missing pawn in the captured list" $ do
-          getCaptures possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "c2",loc "c4"]])]
+        -- it "should have the missing pawn in the captured list" $ do
+          -- getCaptures possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "c2",loc "c4"]])]
 
     describe "when the positions are right for en passant but the opportunity has passed" $ do
       let
@@ -192,21 +192,21 @@ spec = do
 
   describe "A rook" $ do
 
-    it "can move in straight lines" $ do 
+    it "can move in straight lines" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Rd4 Kh1")] "d4")) `shouldBe` sort [
         "d5","d6","d7","d8",
         "e4","f4","g4","h4",
         "d3","d2","d1",
         "c4","b4","a4"]
 
-    it "can move in straight lines up to and including capture" $ do 
+    it "can move in straight lines up to and including capture" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Rd4 Kh1"),(black,"pd7 pg4 pd2 pc4 Kh8")] "d4")) `shouldBe` sort [
         "d5","d6","d7",
         "e4","f4","g4",
         "d3","d2",
         "c4"]
 
-    it "cannot budge teammates" $ do 
+    it "cannot budge teammates" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Rd4 pd7 pg4 pd2 pc4 Kh1")] "d4")) `shouldBe` sort [
         "d5","d6",
         "e4","f4",
@@ -228,21 +228,21 @@ spec = do
 
   describe "A bishop" $ do
 
-    it "can move in diagonal lines" $ do 
+    it "can move in diagonal lines" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Bd4 Kh1")] "d4")) `shouldBe` sort [
         "e5","f6","g7","h8",
         "e3","f2","g1",
         "c3","b2","a1",
         "c5","b6","a7"]
 
-    it "can move in diagonal lines up to and including capture" $ do 
+    it "can move in diagonal lines up to and including capture" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Bd4 Kh1"),(black,"pg7 pf2 pc3 pb6 Kh8")] "d4")) `shouldBe` sort [
         "e5","f6","g7",
         "e3","f2",
         "c3",
         "c5","b6"]
 
-    it "cannot budge teammates" $ do 
+    it "cannot budge teammates" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Bd4 pg7 pf2 pc3 pb6 Kh1")] "d4")) `shouldBe` sort [
         "e5","f6",
         "e3",
@@ -250,7 +250,7 @@ spec = do
 
   describe "A queen" $ do
 
-    it "can do whatever she damn well pleases" $ do 
+    it "can do whatever she damn well pleases" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Qd4 Kh1")] "d4")) `shouldBe` sort [
         -- horizontal (copied from rook)
         "d5","d6","d7","d8",
@@ -263,7 +263,7 @@ spec = do
         "c3","b2","a1",
         "c5","b6","a7"]
 
-    it "can do whatever she damn well pleases up to and including capture" $ do 
+    it "can do whatever she damn well pleases up to and including capture" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Qd4 Kh1"),(black,"pd7 pg4 pd2 pc4 pg7 pf2 pc3 pb6 Kh8")] "d4")) `shouldBe` sort [
         -- horizontal (copied from rook)
         "d5","d6","d7",
@@ -276,7 +276,7 @@ spec = do
         "c3",
         "c5","b6"]
 
-    it "can do whatever she damn well pleases except for budging her teammates" $ do 
+    it "can do whatever she damn well pleases except for budging her teammates" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Qd4 pd7 pg4 pd2 pc4 pg7 pf2 pc3 pb6 Kh1")] "d4")) `shouldBe` sort [
         -- horizontal (copied from rook)
         "d5","d6",
@@ -289,7 +289,7 @@ spec = do
 
   describe "A king" $ do
 
-    it "can take one step anywhere" $ do 
+    it "can take one step anywhere" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Kd4")] "d4")) `shouldBe` sort [
         -- horizontal
         "d5",
@@ -302,7 +302,7 @@ spec = do
         "c3",
         "c5"]
 
-    it "can take one step anywhere and capture" $ do 
+    it "can take one step anywhere and capture" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Kd4"),(black,"pe3 pd3 pc3")] "d4")) `shouldBe` sort [
         -- horizontal
         "d5",
@@ -315,7 +315,7 @@ spec = do
         "c3",
         "c5"]
 
-    it "cannot budge teammates" $ do 
+    it "cannot budge teammates" $ do
       sort (moveTargets (stdPossibleMoves [(white,"Kd4 pe4 pc4 pe3 pc5")] "d4")) `shouldBe` sort [
         -- horizontal
         "d5",
@@ -323,11 +323,11 @@ spec = do
         -- diagonal
         "e5",
         "c3"]
-    
+
     describe "on a board where castling can happen either way" $ do
-      
+
       it "can castle to either the left or right in ideal circumstances" $ do
-        let 
+        let
           ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 pg2 ph2"),(black,"Qc3 Qf3")] "d1"
 
         sort (moveTargets ms) `shouldBe` sort [
@@ -336,9 +336,9 @@ spec = do
           "e1",
           "f1"
           ]
-      
+
       it "can't castle when in check" $ do
-        let 
+        let
           ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pe2 pf2 pg2 ph2"),(black,"Qd3")] "d1"
         sort (moveTargets ms) `shouldBe` sort [
           "c1",
@@ -346,7 +346,7 @@ spec = do
           ]
 
       it "can't castle when rook is capturable" $ do
-        let 
+        let
           ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pb2 pc2 pd2 pe2 pf2 pg2"),(black,"Ra3 Rh3")] "d1"
         sort (moveTargets ms) `shouldBe` sort [
           "c1",
@@ -354,12 +354,12 @@ spec = do
           ]
 
       it "can't castle when the square the king leaps over is capturable" $ do
-        let 
+        let
           ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pd2 pf2 pg2 ph2"),(black,"Rc3 Re3")] "d1"
         sort (moveTargets ms) `shouldBe` []
 
       it "can't castle when the king's target square is capturable" $ do
-        let 
+        let
           ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pc2 pd2 pe2 pg2 ph2"),(black,"Rb3 Rf3")] "d1"
         sort (moveTargets ms) `shouldBe` sort [
           "c1",
@@ -367,7 +367,7 @@ spec = do
           ]
 
       it "can castle when that lonely empty square by the far rook is capturable" $ do
-        let 
+        let
           ms = stdPossibleMoves [(white,"Kd1 Ra1 Rh1 pa2 pb2 pc2 pd2 pe2 pf2 ph2"),(black,"Rg3")] "d1"
         sort (moveTargets ms) `shouldBe` sort [
           "b1",
@@ -385,7 +385,7 @@ spec = do
       Move (_,_) rookRightMoved = move b (loc "h1",loc "g1")
 
     it "can't castle once the king has moved" $ do
-      let 
+      let
         ms = stdPossibleMovesFromBoard kingMoved "e1"
       sort (moveTargets ms) `shouldBe` sort [
         "d1",
@@ -393,7 +393,7 @@ spec = do
         ]
 
     it "can't castle left once the left rook has moved" $ do
-      let 
+      let
         ms = stdPossibleMovesFromBoard rookLeftMoved "d1"
       sort (moveTargets ms) `shouldBe` sort [
         "c1",
@@ -402,7 +402,7 @@ spec = do
         ]
 
     it "can't castle right once the right rook has moved" $ do
-      let 
+      let
         ms = stdPossibleMovesFromBoard rookRightMoved "d1"
       sort (moveTargets ms) `shouldBe` sort [
         "b1",
