@@ -115,23 +115,6 @@ spec = do
     it "should give me the same board and no piece" $ do
       pickUpPiece b (loc "e3") `shouldBe` (b,Nothing)
 
-  describe "Recording a capture" $ do
-    let
-      b = b8x8 [(white,"pd2"),(black,"pe3 pc3")]
-      b' = recordCapture b white (fromRight (pieceAt (loc "e3") b))
-
-    it "should return the same board if no piece is captured" $ do
-      recordCapture b white Nothing `shouldBe` b
-
-    -- it "should add a team if it doesn't exist" $ do
-      -- Map.toList (getCaptures b') `shouldBe` [(white,[Piece black Pawn []])]
-
-    -- it "should append to an existing team's list of captured pieces" $ do
-      -- let
-        -- b'' = recordCapture b' white (fromRight (pieceAt (loc "c3") b'))
-        -- blackPawn = Piece black Pawn []
-      -- Map.toList (getCaptures b'') `shouldBe` [(white,[blackPawn,blackPawn])]
-
   describe "En passant" $ do
     describe "on a board where black can perform en passant on the right" $ do
       let
@@ -143,18 +126,12 @@ spec = do
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "a3"]
 
-      -- it "the second new board should have the original and first boards in its history" $ do
-        -- getBoardHistory b'' `shouldBe` [b,b']
-
       describe "the resulting board" $ do
         let
           possibleBoard = getBoardFromPossibleMoves pm (loc "b4",loc "a3")
 
         it "should be missing the captured piece" $ do
           pieceAt (loc "a4") possibleBoard `shouldBe` Right Nothing
-
-        -- it "should have the missing pawn in the captured list" $ do
-          -- getCaptures possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "a2",loc "a4"]])]
 
     describe "on a board where black can perform en passant on the left" $ do
       let
@@ -166,18 +143,12 @@ spec = do
       it "should allow en passant from black at b4" $ do
         getTargetLocationsFromMoves pm `shouldContain` [loc "c3"]
 
-      -- it "the second new board should have the original and first boards in its history" $ do
-        -- getBoardHistory b'' `shouldBe` [b,b']
-
       describe "the resulting board" $ do
         let
           possibleBoard = getBoardFromPossibleMoves pm (loc "b4",loc "c3")
 
         it "should be missing the captured piece" $ do
           pieceAt (loc "c4") possibleBoard `shouldBe` Right Nothing
-
-        -- it "should have the missing pawn in the captured list" $ do
-          -- getCaptures possibleBoard `shouldBe` Map.fromList [(black,[Piece white Pawn [loc "c2",loc "c4"]])]
 
     describe "when the positions are right for en passant but the opportunity has passed" $ do
       let

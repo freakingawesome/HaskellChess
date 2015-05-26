@@ -30,7 +30,6 @@ type Square = Maybe Piece
 data Board =
   Board {
     squares :: Map.Map Location Square,
-    capturedPieceMap :: Map.Map Team [Piece],
     history :: [Board],
     castlingRookAvailability :: HS.HashSet Location,
     enPassantTarget :: Maybe Location
@@ -39,7 +38,7 @@ data Board =
 
 emptyBoard :: Int -> Int -> Board
 emptyBoard w h =
-  Board (Map.fromList [ ((x,y), Nothing) | x <- [0..(w-1)], y <- [0..(h-1)] ]) Map.empty [] HS.empty Nothing
+  Board (Map.fromList [ ((x,y), Nothing) | x <- [0..(w-1)], y <- [0..(h-1)] ]) [] HS.empty Nothing
 
 newBoard :: Int -> Int -> [(Team,String)] -> Board
 newBoard w h [] = emptyBoard w h
@@ -55,14 +54,14 @@ placeTeamPlayers b (t,p:ps) =
   in placePiece (placeTeamPlayers b (t,ps)) location (Piece t character [])
 
 placePiece :: Board -> Location -> Piece -> Board
-placePiece (Board m capt bs ept cra) (x,y) p =
+placePiece (Board m bs ept cra) (x,y) p =
   let
     insertOrFail val =
       if isNothing val then
         Just (Just p)
       else
         error $ "Square " ++ toAlgebraicLocation (x,y) ++ " is already occupied"
-  in Board (Map.update insertOrFail (x,y) m) capt bs ept cra
+  in Board (Map.update insertOrFail (x,y) m) bs ept cra
 
 newStandardBoard :: Team -> Team -> Board
 newStandardBoard t1 t2 = newBoard 8 8 [
@@ -94,7 +93,7 @@ fromAlgebraicCharacterLocation (x:xs) =
   (fromAlgebraicCharacter x,fromAlgebraicLocation xs)
 
 pieceAt :: Location -> Board -> Either String Square
-pieceAt (x,y) (Board m _ _ _ _) =
+pieceAt (x,y) (Board m _ _ _) =
   case Map.lookup (x,y) m of
     Nothing -> Left "Invalid location"
     Just a -> Right a
@@ -103,7 +102,7 @@ getTeam :: Piece -> Team
 getTeam (Piece t _ _) = t
 
 remainingTeams :: Board -> [Team]
-remainingTeams (Board m _ _ _ _) =
+remainingTeams (Board m _ _ _) =
   nub [ getTeam (fromJust square) | (_,square) <- Map.toList m, isJust square ]
 
 teamName :: Team -> String

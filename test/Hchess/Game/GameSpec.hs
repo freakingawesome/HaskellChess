@@ -68,7 +68,7 @@ spec = do
   describe "A move requiring promotion" $ do
     let
       g = newGame 8 8 [(white,"Ka1 pb7"),(black,"Kh7")]
-    
+
     it "should require specification of a promotion character" $ do
       performMove g (loc "b7",loc "b8") Nothing `shouldBe` Left "You must specify a character for promotion"
 
@@ -77,7 +77,7 @@ spec = do
 
     it "should allow a promotion" $ do
       let
-        Right (Game b _) = performMove g (loc "b7",loc "b8") (Just Queen) 
+        Right (Game b _) = performMove g (loc "b7",loc "b8") (Just Queen)
 
       getCharacter (fromJust (fromRight (pieceAt (loc "b8") b))) `shouldBe` Queen
 
