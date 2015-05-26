@@ -127,11 +127,3 @@ removeTeam (x:xs) r
 currentTeam :: Game -> Team
 currentTeam (Game _ []) = error "No teams defined"
 currentTeam (Game _ (t:_)) = t
-
--- simpleSerializeGame :: Game -> String
--- simpleSerializeGame (Game b t) = show (SerializableGame b (turnsToTeams t))
---
--- simpleDeserializeGame :: String -> Game
--- simpleDeserializeGame s = Game b (getTurns t)
-  -- where (SerializableGame b t) = read s :: SerializableGame
---
