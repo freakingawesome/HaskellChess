@@ -53,14 +53,19 @@ placeTeamPlayers b (t,p:ps) =
   in placePiece (placeTeamPlayers b (t,ps)) location (Piece t character [])
 
 placePiece :: Board -> Location -> Piece -> Board
-placePiece (Board m ept cra) (x,y) p =
+placePiece (Board m cra ept) (x,y) p =
   let
     insertOrFail val =
       if isNothing val then
         Just (Just p)
       else
         error $ "Square " ++ toAlgebraicLocation (x,y) ++ " is already occupied"
-  in Board (Map.update insertOrFail (x,y) m) ept cra
+    castlingRookMapped =
+      if getCharacter p == Rook then
+        HS.insert (x,y) cra
+      else
+        cra
+  in Board (Map.update insertOrFail (x,y) m) castlingRookMapped ept
 
 newStandardBoard :: Team -> Team -> Board
 newStandardBoard t1 t2 = newBoard 8 8 [

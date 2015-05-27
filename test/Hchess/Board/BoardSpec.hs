@@ -2,6 +2,8 @@ module Hchess.Board.BoardSpec where
 
 import SpecHelper
 import TestUtil
+import qualified Data.HashSet as HS
+import Data.List
 
 spec :: Spec
 spec = do
@@ -68,4 +70,8 @@ spec = do
 
     it "should tell you if a location is invalid" $ do
       standardBoardPieceAt "z9" `shouldBe` Left "Invalid location" -- TODO: assert isLeft instead
+
+    it "should list all rook locations as valid castling targets" $ do
+      sort (HS.toList (castlingRookAvailability (newStandardBoard white black))) `shouldBe` sort (map loc ["a1","h8","h1","a8"])
+
 
