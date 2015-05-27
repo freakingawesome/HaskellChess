@@ -13,10 +13,10 @@ spec = do
     it "should not be constrained to a square" $ do
       boardSize (emptyBoard 7 3) `shouldBe` 21
 
-  describe "Translating to algebraic notation" $ do 
+  describe "Translating to algebraic notation" $ do
     it "should locate the south-west corner" $ do
       toAlgebraicLocation (0,0) `shouldBe` "a1"
-      
+
     it "should locate some square in the middle" $ do
       toAlgebraicLocation (2,6) `shouldBe` "c7"
 
@@ -30,29 +30,29 @@ spec = do
   describe "Character shorthand" $ do
     it "should identify a pawn" $ do
       fromAlgebraicCharacter 'p' `shouldBe` Pawn
-  
+
     it "should identify a rook" $ do
       fromAlgebraicCharacter 'R' `shouldBe` Rook
-  
+
     it "should identify a knight" $ do
       fromAlgebraicCharacter 'N' `shouldBe` Knight
-  
+
     it "should identify a bishop" $ do
       fromAlgebraicCharacter 'B' `shouldBe` Bishop
-  
+
     it "should identify a queen" $ do
       fromAlgebraicCharacter 'Q' `shouldBe` Queen
-  
+
     it "should identify a king" $ do
       fromAlgebraicCharacter 'K' `shouldBe` King
 
   describe "Translating a character's location from shorthand" $ do
     it "should locate the pawn at b2" $ do
       fromAlgebraicCharacterLocation "pb2" `shouldBe` (Pawn,(1,1))
-  
+
     it "should locate the king at d1" $ do
       fromAlgebraicCharacterLocation "Kd1" `shouldBe` (King,(3,0))
- 
+
   describe "A new standard board" $ do
     it "should find a black rook at a8" $ do
       standardBoardPieceAt "a8" `shouldBe` Right (Just (Piece black Rook []))
@@ -68,4 +68,4 @@ spec = do
 
     it "should tell you if a location is invalid" $ do
       standardBoardPieceAt "z9" `shouldBe` Left "Invalid location" -- TODO: assert isLeft instead
- 
+
