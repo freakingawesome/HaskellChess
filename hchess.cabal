@@ -14,20 +14,21 @@ maintainer:             chad@freakingawesome.net
 category:               Unknown
 build-type:             Simple
 -- extra-source-files:
-cabal-version:          >=1.10
+cabal-version:          >=1.16.0
 
 executable hchess
   main-is:              Main.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:        base >=4.6 && <4.7
+  build-depends:        base == 4.7.*
                         , either-unwrap
 
   hs-source-dirs:       src
   ghc-options:          -Wall
   default-language:     Haskell2010
 
-  build-depends: base ==4.6.*, Cabal >= 1.16.0 
+  build-depends: base == 4.7.*
+               , Cabal >= 1.16.0 
                , hchess
                , containers
                , unordered-containers
@@ -45,7 +46,7 @@ library
                         , Hchess.Game
   -- other-modules:
   -- other-extensions:
-  build-depends:        base >=4.6 && <4.7,
+  build-depends:        base == 4.7.*,
                         containers,
                         unordered-containers,
                         split,
@@ -61,7 +62,8 @@ test-suite spec
   main-is: Spec.hs
   default-language:     Haskell2010
   ghc-options:          -Wall
-  build-depends: base ==4.6.*, Cabal >= 1.16.0 
+  build-depends: base == 4.7.*
+               , Cabal >= 1.16.0
                , hspec >= 1.3 
                , hchess
                , containers
