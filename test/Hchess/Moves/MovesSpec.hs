@@ -6,6 +6,7 @@ import qualified Data.Map as Map
 import Data.Maybe(fromJust)
 import Data.List(sort)
 import Data.Either.Unwrap
+import qualified Data.HashSet as HS
 
 spec :: Spec
 spec = do
@@ -380,6 +381,18 @@ spec = do
         "c1",
         "e1"
         ]
+
+    it "should list all rook locations as valid castling targets" $ do
+      sort (HS.toList (castlingRookAvailability b)) `shouldBe` sort (map loc ["a1","h1"])
+
+    it "castling availability after king moves is nil" $ do
+      HS.toList (castlingRookAvailability kingMoved) `shouldBe` []
+
+    it "left rook moving forfeits castling availability" $ do
+      sort (HS.toList (castlingRookAvailability rookLeftMoved)) `shouldBe` sort (map loc ["h1"])
+
+    it "right rook moving forfeits castling availability" $ do
+      sort (HS.toList (castlingRookAvailability rookRightMoved)) `shouldBe` sort (map loc ["a1"])
 
   describe "The resulting board from castling" $ do
     let

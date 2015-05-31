@@ -4,6 +4,7 @@ import Hchess.Board
 import qualified Data.Map as Map
 import Data.Either.Unwrap
 import Data.Maybe
+import qualified Data.HashSet as HS
 
 data Move = Move (Location,Location) Board deriving (Show,Eq)
 
@@ -170,7 +171,7 @@ getMoves b from (to:tos) =
 
 -- Performs an already vetted move.
 move :: Board -> (Location,Location) -> Move
-move (Board m cra ept) (from,to) = Move (from,to) b'''
+move (Board m cra ept) (from,to) = Move (from,to) b''''
   where
     fromPiece = fromJust (fromRight (pieceAt from (Board m cra ept)))
     (b',Just mover) = pickUpPiece (ifCastlingFirstMoveRook (Board m cra newEnPassantTargetLoc)) from
@@ -184,6 +185,11 @@ move (Board m cra ept) (from,to) = Move (from,to) b'''
         else
           to)
     b''' = placePiece b'' to mover
+    b'''' = case moverChar fromPiece of
+      King -> b''' { castlingRookAvailability =
+        HS.filter (\l -> getTeam (fromJust (fromRight (pieceAt l b'''))) /= moverTeam fromPiece) cra }
+      Rook -> b''' { castlingRookAvailability = HS.filter (/=from) cra }
+      otherwise -> b'''
     isEnPassantCapture =
       moverChar mover == Pawn
       && (to == relLoc from (moverAff mover) (1,1) || to == relLoc from (moverAff mover) (-1,1))
