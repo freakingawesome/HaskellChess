@@ -185,11 +185,10 @@ move (Board m cra ept) (from,to) = Move (from,to) b''''
         else
           to)
     b''' = placePiece b'' to mover
-    b'''' = case moverChar fromPiece of
-      King -> b''' { castlingRookAvailability =
-        HS.filter (\l -> getTeam (fromJust (fromRight (pieceAt l b'''))) /= moverTeam fromPiece) cra }
-      Rook -> b''' { castlingRookAvailability = HS.filter (/=from) cra }
-      otherwise -> b'''
+    b'''' = b''' { castlingRookAvailability = case moverChar fromPiece of
+      King -> HS.filter (\l -> getTeam (fromJust (fromRight (pieceAt l b'''))) /= moverTeam fromPiece) cra
+      Rook -> HS.filter (/=from) cra
+      otherwise -> cra }
     isEnPassantCapture =
       moverChar mover == Pawn
       && (to == relLoc from (moverAff mover) (1,1) || to == relLoc from (moverAff mover) (-1,1))
