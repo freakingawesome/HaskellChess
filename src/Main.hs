@@ -123,37 +123,37 @@ boardSquare b x maxX y posMoves =
     rbord = if (x,y) `elem` posMoves then "▏" else " "
 
 utf8Piece :: Piece -> Char
-utf8Piece (Piece (Team _ name) Pawn _) = 
+utf8Piece (Piece (Team _ name) Pawn) =
   case name of
     "White" -> '♙'
     "Black" -> '♟'
     _ -> 'p'
 
-utf8Piece (Piece (Team _ name) Rook _) = 
+utf8Piece (Piece (Team _ name) Rook) =
   case name of
     "White" -> '♖'
     "Black" -> '♜'
     _ -> 'R'
 
-utf8Piece (Piece (Team _ name) Knight _) = 
+utf8Piece (Piece (Team _ name) Knight) =
   case name of
     "White" -> '♘'
     "Black" -> '♞'
     _ -> 'N'
 
-utf8Piece (Piece (Team _ name) Bishop _) = 
+utf8Piece (Piece (Team _ name) Bishop) =
   case name of
     "White" -> '♗'
     "Black" -> '♝'
     _ -> 'B'
 
-utf8Piece (Piece (Team _ name) Queen _) = 
+utf8Piece (Piece (Team _ name) Queen) =
   case name of
     "White" -> '♕'
     "Black" -> '♛'
     _ -> 'Q'
 
-utf8Piece (Piece (Team _ name) King _) = 
+utf8Piece (Piece (Team _ name) King) =
   case name of
     "White" -> '♔'
     "Black" -> '♚'
