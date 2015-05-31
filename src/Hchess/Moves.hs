@@ -112,7 +112,7 @@ possibleMovesByPiece b l (Piece t Queen _) =
     (-1,-1)])
 
 -- King
-possibleMovesByPiece b l (Piece (Team aff t) King ms) =
+possibleMovesByPiece b@(Board _ cra _) l (Piece team@(Team aff t) King ms) =
   getMoves b l (
     emptyOrEnemy b (Team aff t) (map (relLoc l aff) ([
       (0,1),
@@ -124,21 +124,18 @@ possibleMovesByPiece b l (Piece (Team aff t) King ms) =
       (-1,1),
       (-1,-1)] ++ getCastlingPositionsFromKing)))
   where
-    getCastlingPositionsFromKing =
-      if null ms
-        && not (null castlingLocs)
+    getCastlingPositionsFromKing = if not (null castlingLocs)
         && not (isLocationImmediatelyThreatened (Team aff t) b l) then
           castlingLocs
       else
           []
     lineOfSight dir = lineOfSightEndingInUnmovedTeamRook b (Team aff t) l (dir,0)
-    castlingPossible dir =
-      not (null (lineOfSight dir))
+    castlingPossible dir = not (null (lineOfSight dir))
       && and (first2AndLast1 (map (not.isLocationImmediatelyThreatened (Team aff t) b) (lineOfSight dir)))
-    castLeft = [(-2,0) | castlingPossible (-1)]
-    castRight = [(2,0) | castlingPossible 1]
-    castlingLocs = castLeft ++ castRight
+    castlingLocs = map (\i -> (2 * i, 0)) $ filter castlingPossible dirs
     first2AndLast1 list = take 2 list ++ [last list]
+    dirs = map (\(x,_) -> let n = x - fst l in quot n (abs n)) $
+      HS.toList $ HS.filter (\l -> teamAt b l == Just team) cra
 
 getMoves :: Board -> Location -> [Location] -> [Move]
 getMoves _ _ [] = []
@@ -186,7 +183,7 @@ move (Board m cra ept) (from,to) = Move (from,to) b''''
           to)
     b''' = placePiece b'' to mover
     b'''' = b''' { castlingRookAvailability = case moverChar fromPiece of
-      King -> HS.filter (\l -> getTeam (fromJust (fromRight (pieceAt l b'''))) /= moverTeam fromPiece) cra
+      King -> HS.filter (\l -> teamAt b''' l /= Just (moverTeam fromPiece)) cra
       Rook -> HS.filter (/=from) cra
       otherwise -> cra }
     isEnPassantCapture =

@@ -118,3 +118,10 @@ getCharacter (Piece _ c _) = c
 getAffinity :: Team -> Affinity
 getAffinity (Team a _) = a
 
+teamAt :: Board -> Location -> Maybe Team
+teamAt b l = teamAt' (pieceAt l b)
+  where
+    teamAt' (Left _) = Nothing
+    teamAt' (Right Nothing) = Nothing
+    teamAt' (Right (Just (Piece t _ _))) = Just t
+
