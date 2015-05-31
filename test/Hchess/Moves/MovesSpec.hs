@@ -33,18 +33,6 @@ spec = do
     it "cannot move forward diagonally if occupied by teammates" $ do
       moveTargets (stdPossibleMoves [(white,"pd2 pc3 pe3")] "d2") `shouldBe` ["d3", "d4"]
 
-  -- describe "A white pawn on a standard board at d3" $ do
-    -- it "can move to only d4 if isolated" $ do
-      -- moveTargets (stdPossibleMovesWithHistory [(white,"pd3")] [("d3",["d2"])] "d3") `shouldBe` ["d4"]
- --
-  -- describe "A black pawn on a standard board at d6" $ do
-    -- it "can move to only d5 if isolated" $ do
-      -- moveTargets (stdPossibleMovesWithHistory [(black,"pd6")] [("d6",["d7"])] "d6") `shouldBe` ["d5"]
-  --
-  -- describe "Some internal tests of helper functions" $ do
-    -- it "should be able to inject a piece's history" $ do
-      -- injectPieceHistory (Piece black Pawn []) ["a1","b2"] `shouldBe` Piece black Pawn (locs ["a1","b2"])
-
   describe "A super tiny board" $ do
     it "should not allow pawns moving off the edge if below absolute north" $ do
       moveTargets (possibleMovesFromLocation (newBoard 2 2 [(white,"pa1")]) (loc "a1") 1) `shouldBe` replicate 4 "a2" -- 4 because of pawn promotion
@@ -59,8 +47,6 @@ spec = do
       let
         m = move b (loc "d2",loc "d3")
         b' = getBoard m
-      -- it "should have no captures" $ do
-        -- getCaptures b' `shouldBe` Map.empty
 
       it "should have no piece at d2" $ do
         pieceAt (loc "d2") b' `shouldBe` Right Nothing
@@ -70,17 +56,8 @@ spec = do
         m = move b (loc "d2",loc "e3")
         b' = getBoard m
 
-      -- it "make sure the original board has no captures" $ do
-        -- Map.lookup white (getCaptures b) `shouldBe` Nothing
-
-      -- it "should have one capture" $ do
-        -- Map.lookup white (getCaptures b') `shouldBe` Just ([Piece black Pawn [loc "e3"]])
-
       it "should move the original piece to the target location" $ do
-        fromRight (pieceAt (loc "e3") b') `shouldBe` Just (Piece white Pawn [loc "d2"])
-
-      -- it "the new board should have the original board in its history" $ do
-        -- getBoardHistory b' `shouldBe` [b]
+        fromRight (pieceAt (loc "e3") b') `shouldBe` Just (Piece white Pawn)
 
   describe "Picking up the last piece on a board" $ do
     let
@@ -91,7 +68,7 @@ spec = do
       pieceCount b' `shouldBe` 0
 
     it "should give me back my pawn with its last recorded location" $ do
-      p' `shouldBe` Just (Piece white Pawn [loc "d2"])
+      p' `shouldBe` Just (Piece white Pawn)
 
   describe "Picking up a piece from a new board" $ do
     let
@@ -102,13 +79,13 @@ spec = do
       pieceCount b' `shouldBe` 31
 
     it "just making sure the king existed on the original board" $ do
-      pieceAt (loc "e1") b `shouldBe` Right (Just (Piece white King []))
+      pieceAt (loc "e1") b `shouldBe` Right (Just (Piece white King))
 
     it "should leave the king spot empty" $ do
       pieceAt (loc "e1") b' `shouldBe` Right Nothing
 
     it "should give me back my king with its last recorded location" $ do
-      p' `shouldBe` Just (Piece white King [loc "e1"])
+      p' `shouldBe` Just (Piece white King)
 
   describe "Trying to pick up a piece from an empty square" $ do
     let
@@ -402,16 +379,16 @@ spec = do
       Move (_,_) bRight = move b (loc "d1",loc "f1")
 
     it "should result in the castle jumping to the expected square when castling left" $ do
-      fromRight (pieceAt (loc "b1") bLeft) `shouldBe` Just (Piece white King [loc "d1"])
+      fromRight (pieceAt (loc "b1") bLeft) `shouldBe` Just (Piece white King)
 
     it "should move the left rook when castling left" $ do
-      fromRight (pieceAt (loc "c1") bLeft) `shouldBe` Just (Piece white Rook [loc "a1"])
+      fromRight (pieceAt (loc "c1") bLeft) `shouldBe` Just (Piece white Rook)
 
     it "should result in the castle jumping to the expected square when castling right" $ do
-      fromRight (pieceAt (loc "f1") bRight) `shouldBe` Just (Piece white King [loc "d1"])
+      fromRight (pieceAt (loc "f1") bRight) `shouldBe` Just (Piece white King)
 
     it "should move the right rook when castling right" $ do
-      fromRight (pieceAt (loc "e1") bRight) `shouldBe` Just (Piece white Rook [loc "h1"])
+      fromRight (pieceAt (loc "e1") bRight) `shouldBe` Just (Piece white Rook)
 
   describe "The resulting board from castling on the black team" $ do
     let
@@ -420,22 +397,22 @@ spec = do
       Move (_,_) bRight = move b (loc "d8",loc "b8")
 
     it "should result in the castle jumping to the expected square when castling left" $ do
-      fromRight (pieceAt (loc "f8") bLeft) `shouldBe` Just (Piece black King [loc "d8"])
+      fromRight (pieceAt (loc "f8") bLeft) `shouldBe` Just (Piece black King)
 
     it "should result in an empty square where the left rook was at" $ do
       fromRight (pieceAt (loc "h8") bLeft) `shouldBe` Nothing
 
     it "should result in an non-empty square where the right rook was at" $ do
-      fromRight (pieceAt (loc "a8") bLeft) `shouldBe` Just (Piece black Rook [])
+      fromRight (pieceAt (loc "a8") bLeft) `shouldBe` Just (Piece black Rook)
 
     it "should move the left rook when castling left" $ do
-      fromRight (pieceAt (loc "e8") bLeft) `shouldBe` Just (Piece black Rook [loc "h8"])
+      fromRight (pieceAt (loc "e8") bLeft) `shouldBe` Just (Piece black Rook)
 
     it "should result in the castle jumping to the expected square when castling right" $ do
-      fromRight (pieceAt (loc "b8") bRight) `shouldBe` Just (Piece black King [loc "d8"])
+      fromRight (pieceAt (loc "b8") bRight) `shouldBe` Just (Piece black King)
 
     it "should move the right rook when castling right" $ do
-      fromRight (pieceAt (loc "c8") bRight) `shouldBe` Just (Piece black Rook [loc "a8"])
+      fromRight (pieceAt (loc "c8") bRight) `shouldBe` Just (Piece black Rook)
 
   describe "Pawn promotion" $ do
     let
@@ -448,7 +425,7 @@ spec = do
       let
         boards = map getBoard ms
         toSquares = map (\b -> (fromJust (fromRight (pieceAt (loc "d8") b)))) boards
-        charAt (Piece _ c _) = c
+        charAt (Piece _ c) = c
       map charAt toSquares `shouldBe` sort [
         Rook,
         Knight,

@@ -57,7 +57,7 @@ spec = do
     let
       Right g = performMove newStandardGame (loc "a2",loc "a4") Nothing
       Game b teams = g
-      Right (Just (Piece t c _)) = pieceAt (loc "a4") b
+      Right (Just (Piece t c)) = pieceAt (loc "a4") b
 
     it "should now be black's move" $ do
       head teams `shouldBe` black

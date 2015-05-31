@@ -54,13 +54,4 @@ alglocs :: [Location] -> [String]
 alglocs [] = []
 alglocs (x:xs) = algloc x : alglocs xs
 
--- injectBoardHistory :: Board -> [(String,[String])] -> Board
--- injectBoardHistory b [] = b
--- injectBoardHistory (Board m capt bs) ((al,hist):hs) =
-  -- let updateOrFail p = if p == Nothing then error "Invalid location" else Just (Just (injectPieceHistory (fromJust p) hist))
-  -- in injectBoardHistory (Board (Map.update updateOrFail (loc al) m) capt bs) hs
-
-injectPieceHistory :: Piece -> [String] -> Piece
-injectPieceHistory (Piece t c _) hs = Piece t c (locs hs)
-
 

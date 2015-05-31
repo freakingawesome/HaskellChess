@@ -22,7 +22,7 @@ data Team =
 type Location = (Int,Int)
 
 data Piece =
-  Piece Team Character [Location]
+  Piece Team Character
   deriving (Show,Read,Eq)
 
 type Square = Maybe Piece
@@ -50,7 +50,7 @@ placeTeamPlayers :: Board -> (Team,[String]) -> Board
 placeTeamPlayers b (_,[]) = b
 placeTeamPlayers b (t,p:ps) =
   let (character,location) = fromAlgebraicCharacterLocation p
-  in placePiece (placeTeamPlayers b (t,ps)) location (Piece t character [])
+  in placePiece (placeTeamPlayers b (t,ps)) location (Piece t character)
 
 placePiece :: Board -> Location -> Piece -> Board
 placePiece (Board m cra ept) (x,y) p =
@@ -103,7 +103,7 @@ pieceAt (x,y) (Board m _ _) =
     Just a -> Right a
 
 getTeam :: Piece -> Team
-getTeam (Piece t _ _) = t
+getTeam (Piece t _) = t
 
 remainingTeams :: Board -> [Team]
 remainingTeams (Board m _ _) =
@@ -113,7 +113,7 @@ teamName :: Team -> String
 teamName (Team _ name) = name
 
 getCharacter :: Piece -> Character
-getCharacter (Piece _ c _) = c
+getCharacter (Piece _ c) = c
 
 getAffinity :: Team -> Affinity
 getAffinity (Team a _) = a
@@ -123,5 +123,5 @@ teamAt b l = teamAt' (pieceAt l b)
   where
     teamAt' (Left _) = Nothing
     teamAt' (Right Nothing) = Nothing
-    teamAt' (Right (Just (Piece t _ _))) = Just t
+    teamAt' (Right (Just (Piece t _))) = Just t
 

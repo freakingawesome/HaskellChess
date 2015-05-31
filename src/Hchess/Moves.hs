@@ -19,7 +19,7 @@ possibleMovesFromLocation b l = possibleMoves b l (pieceAt l b)
 
 possibleMoves :: Board -> Location -> Either String Square -> Int -> Either String [Move]
 possibleMoves _ _ (Left err) _ = Left err
-possibleMoves b l (Right (Just p@(Piece t c ls))) deep = Right (protectKing moves)
+possibleMoves b l (Right (Just p@(Piece t c))) deep = Right (protectKing moves)
   where
     moves = possibleMovesByPiece b l p
     protectKing = filter (\(Move m b') -> not (isKingInCheck t b' deep))
@@ -67,11 +67,11 @@ ffl l aff = relLoc l aff (-1,2)
 possibleMovesByPiece :: Board -> Location -> Piece -> [Move]
 
 -- Pawn
-possibleMovesByPiece (Board m cra ept) l (Piece (Team aff t) Pawn ls) =
+possibleMovesByPiece (Board m cra ept) l (Piece (Team aff t) Pawn) =
   let
     b = Board m cra ept
-    p = Piece (Team aff t) Pawn ls
-    straight = if null ls then
+    p = Piece (Team aff t) Pawn
+    straight = if isRight (pieceAt (rev l aff 1) b) && isLeft (pieceAt (rev l aff 2) b) then
       lineOfSightUnoccupied b [fwd l aff 1,fwd l aff 2]
     else
       filterUnoccupied b [fwd l aff 1]
@@ -79,11 +79,11 @@ possibleMovesByPiece (Board m cra ept) l (Piece (Team aff t) Pawn ls) =
   in getMoves b l (straight ++ diag ++ getEnPassantTargetLocations b l p)
 
 -- Rook
-possibleMovesByPiece b l (Piece t Rook _) =
+possibleMovesByPiece b l (Piece t Rook) =
   getMoves b l (concatMap (lineOfSightMaybeCapture b t l) [(0,1),(1,0),(0,-1),(-1,0)])
 
 -- Knight
-possibleMovesByPiece b l (Piece (Team aff t) Knight _) =
+possibleMovesByPiece b l (Piece (Team aff t) Knight) =
   getMoves b l (
     emptyOrEnemy b (Team aff t) (map (relLoc l aff) [
       (1,2),
@@ -96,11 +96,11 @@ possibleMovesByPiece b l (Piece (Team aff t) Knight _) =
       (-2,-1)]))
 
 -- Bishop
-possibleMovesByPiece b l (Piece t Bishop _) =
+possibleMovesByPiece b l (Piece t Bishop) =
   getMoves b l (concatMap (lineOfSightMaybeCapture b t l) [(1,1),(1,-1),(-1,1),(-1,-1)])
 
 -- Queen
-possibleMovesByPiece b l (Piece t Queen _) =
+possibleMovesByPiece b l (Piece t Queen) =
   getMoves b l (concatMap (lineOfSightMaybeCapture b t l) [
     (0,1),
     (1,0),
@@ -112,7 +112,7 @@ possibleMovesByPiece b l (Piece t Queen _) =
     (-1,-1)])
 
 -- King
-possibleMovesByPiece b@(Board _ cra _) l (Piece team@(Team aff t) King ms) =
+possibleMovesByPiece b@(Board _ cra _) l (Piece team@(Team aff t) King) =
   getMoves b l (
     emptyOrEnemy b (Team aff t) (map (relLoc l aff) ([
       (0,1),
@@ -147,9 +147,9 @@ getMoves b from (to:tos) =
   ++ getMoves b from tos
   where
     basicMove = move b (from,to)
-    fromAff (Just (Piece (Team aff _) _ _)) = aff
+    fromAff (Just (Piece (Team aff _) _)) = aff
     fromPiece = fromRight (pieceAt from b)
-    isPawn (Just (Piece _ Pawn _)) = True
+    isPawn (Just (Piece _ Pawn)) = True
     isPawn _ = False
     isPawnPromotion = isPawn fromPiece
       && relLoc from (fromAff fromPiece) (0,1) == to
@@ -164,7 +164,7 @@ getMoves b from (to:tos) =
       where
         swapTargetChar (Move locs b) toChar = Move locs (swapCharAt to b toChar)
         swapCharAt loc (Board m cra ept) toChar = Board (Map.update (swapChar toChar) loc m) cra ept
-        swapChar toChar (Just (Piece t c pl)) = Just (Just (Piece t toChar pl))
+        swapChar toChar (Just (Piece t c)) = Just (Just (Piece t toChar))
 
 -- Performs an already vetted move.
 move :: Board -> (Location,Location) -> Move
@@ -172,9 +172,9 @@ move (Board m cra ept) (from,to) = Move (from,to) b''''
   where
     fromPiece = fromJust (fromRight (pieceAt from (Board m cra ept)))
     (b',Just mover) = pickUpPiece (ifCastlingFirstMoveRook (Board m cra newEnPassantTargetLoc)) from
-    moverChar (Piece _ c _) = c
-    moverAff (Piece (Team aff _) _ _) = aff
-    moverTeam (Piece t _ _) = t
+    moverChar (Piece _ c) = c
+    moverAff (Piece (Team aff _) _) = aff
+    moverTeam (Piece t _) = t
     (b'',dead) =
       pickUpPiece b' (
         if isEnPassantCapture then
@@ -209,16 +209,10 @@ move (Board m cra ept) (from,to) = Move (from,to) b''''
           relLoc from (getAffinity (getTeam fromPiece)) (sign,0))
 
 pickUpPiece :: Board -> Location -> (Board,Maybe Piece)
-pickUpPiece (Board m cra ept) l = (Board (Map.update removePiece l m) cra ept, p')
+pickUpPiece (Board m cra ept) l = (Board (Map.update removePiece l m) cra ept, p)
   where
     p = fromRight (pieceAt l (Board m cra ept))
     removePiece _ = Just Nothing
-    recordLastLocation (Piece t c ls) = Piece t c (ls ++ [l])
-    p' =
-      if isNothing p then
-        Nothing
-      else
-        Just (recordLastLocation (fromJust p))
 
 filterUnoccupied :: Board -> [Location] -> [Location]
 filterUnoccupied b = filter (\x -> pieceAt x b == Right Nothing)
@@ -227,7 +221,7 @@ filterOccupiedByEnemy :: Board -> Team -> [Location] -> [Location]
 filterOccupiedByEnemy b t = filter (\x -> isEnemy t (pieceAt x b))
 
 isEnemy :: Team -> Either String Square -> Bool
-isEnemy us (Right (Just (Piece t _ _))) = us /= t
+isEnemy us (Right (Just (Piece t _))) = us /= t
 isEnemy _ _ = False
 
 -- Assumes head to tail is a single line of sight
@@ -253,7 +247,7 @@ lineOfSightMaybeCapture b (Team aff t) l (r,f)
 lineOfSightEndingInUnmovedTeamRook :: Board -> Team -> Location -> (Int,Int) -> [Location]
 lineOfSightEndingInUnmovedTeamRook b (Team aff t) l direction
   | p == Right Nothing = if null restOfSquares then [] else targetLoc : restOfSquares
-  | isTeammateUnmovedRook p (Team aff t) = [targetLoc]
+  | teamAt b targetLoc == Just (Team aff t) && HS.member targetLoc (castlingRookAvailability b) = [targetLoc]
   | otherwise = []
   where
     targetLoc = relLoc l aff direction
@@ -271,27 +265,23 @@ emptyOrEnemy b t (l:ls)
 -- if en passant is possible for either side.
 getEnPassantTargetLocations :: Board -> Location -> Piece -> [Location]
 getEnPassantTargetLocations (Board _ _ Nothing) _ _ = []
-getEnPassantTargetLocations (Board _ _ (Just ept)) l (Piece (Team aff t) Pawn _) =
+getEnPassantTargetLocations (Board _ _ (Just ept)) l (Piece (Team aff t) Pawn) =
   [ x | x <- [fwdr l aff 1,fwdl l aff 1], x == ept ]
 
 isEnemyPawn :: Either String Square -> Team -> Bool
-isEnemyPawn (Right (Just (Piece otherTeam Pawn _))) t = otherTeam /= t
+isEnemyPawn (Right (Just (Piece otherTeam Pawn))) t = otherTeam /= t
 isEnemyPawn _ _ = False
 
 isEmpty :: Either String Square -> Bool
 isEmpty (Right Nothing) = True
 isEmpty _ = False
 
-isTeammateUnmovedRook :: Either String Square -> Team -> Bool
-isTeammateUnmovedRook (Right (Just (Piece team Rook ms))) t = team == t && null ms
-isTeammateUnmovedRook _ _ = False
-
 isKingInCheck :: Team -> Board -> Int -> Bool
 isKingInCheck t b deep =
   not (null kingSquares) -- HACK: a bit of a hack so that I don't have to put a king in all my tests
     && isLocationCapturable t b kingLoc deep
   where
-    kingSquares = [ loc | (loc,Piece _ c _) <- mySquares t b, c == King ]
+    kingSquares = [ loc | (loc,Piece _ c) <- mySquares t b, c == King ]
     kingLoc = head kingSquares
 
 isLocationCapturable :: Team -> Board -> Location -> Int -> Bool

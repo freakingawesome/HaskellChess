@@ -57,13 +57,13 @@ spec = do
 
   describe "A new standard board" $ do
     it "should find a black rook at a8" $ do
-      standardBoardPieceAt "a8" `shouldBe` Right (Just (Piece black Rook []))
+      standardBoardPieceAt "a8" `shouldBe` Right (Just (Piece black Rook))
 
     it "should find a white king at e1" $ do
-      standardBoardPieceAt "e1" `shouldBe` Right (Just (Piece white King []))
+      standardBoardPieceAt "e1" `shouldBe` Right (Just (Piece white King))
 
     it "should find a black king at e8" $ do
-      standardBoardPieceAt "e8" `shouldBe` Right (Just (Piece black King []))
+      standardBoardPieceAt "e8" `shouldBe` Right (Just (Piece black King))
 
     it "should find nothing in the middle of the board" $ do
       standardBoardPieceAt "d4" `shouldBe` Right Nothing
