@@ -19,10 +19,10 @@ possibleMovesFromLocation b l = possibleMoves b l (pieceAt l b)
 
 possibleMoves :: Board -> Location -> Either String Square -> Int -> Either String [Move]
 possibleMoves _ _ (Left err) _ = Left err
-possibleMoves b l (Right (Just (Piece t c ls))) deep = Right (protectKing moves)
+possibleMoves b l (Right (Just p@(Piece t c ls))) deep = Right (protectKing moves)
   where
-    moves = possibleMovesByPiece b l (Piece t c ls)
-    protectKing ms = [ Move m b' | Move m b' <- ms, not (isKingInCheck t b' deep)]
+    moves = possibleMovesByPiece b l p
+    protectKing = filter (\(Move m b') -> not (isKingInCheck t b' deep))
 
 possibleMoves _ _ (Right Nothing) _ = Left "Location is empty"
 

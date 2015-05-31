@@ -9,12 +9,6 @@ import Data.Either.Unwrap
 boardSize :: Board -> Int
 boardSize b = Map.size (squares b)
 
--- black :: Team
--- black = Team South "Black"
-
--- white :: Team
--- white = Team North "White"
-
 standardBoardPieceAt :: String -> Either String Square
 standardBoardPieceAt s = pieceAt (fromAlgebraicLocation s) (newStandardBoard white black)
 
@@ -26,9 +20,6 @@ stdPossibleMoves ts al = stdPossibleMovesFromBoard (b8x8 ts) al
 
 stdPossibleMovesFromBoard :: Board -> String -> Either String [Move]
 stdPossibleMovesFromBoard b al = possibleMovesFromLocation b (fromAlgebraicLocation al) 1
-
--- stdPossibleMovesWithHistory :: [(Team,String)] -> [(String,[String])] -> String -> Either String [Move]
--- stdPossibleMovesWithHistory ts hist al = possibleMovesFromLocation (injectBoardHistory (b8x8 ts) hist) (fromAlgebraicLocation al) 1
 
 getBoard :: Move -> Board
 getBoard (Move _ b) = b
