@@ -44,6 +44,7 @@ library
                         , Hchess.Moves
                         , Hchess.Bots
                         , Hchess.Game
+                        , Hchess.Fen
   -- other-modules:
   -- other-extensions:
   build-depends:        base == 4.7.*,
