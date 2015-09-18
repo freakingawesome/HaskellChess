@@ -30,10 +30,10 @@ newStandardGame =
   Game (newStandardBoard white black) (getTurns [white,black]) 0 1
 
 performMove :: Game -> (Location,Location) -> Maybe Character -> Either String Game
-performMove (Game b teams hmc fmn) (from,to) promo
+performMove g@(Game b teams hmc fmn) (from,to) promo
   | isLeft fromContents = Left "Invalid location"
   | isNothing fromSquare = Left "The source square is empty"
-  | fromTeam /= currentTeam (Game b teams hmc fmn) = Left $ "It is not " ++ teamName fromTeam ++ "'s turn"
+  | fromTeam /= currentTeam g = Left $ "It is not " ++ teamName fromTeam ++ "'s turn"
   | isLeft pms = Left "Illegal move"
   | null possibleTargetLocs = Left "This piece is currently incapacitated"
   | to `notElem` possibleTargetLocs = Left "Illegal move"
@@ -53,16 +53,26 @@ performMove (Game b teams hmc fmn) (from,to) promo
   where
     fromContents = pieceAt from b
     fromSquare = fromRight fromContents
+    toSquare = fromRight (pieceAt to b)
     pms = possibleMovesFromLocation b from (length (remainingTeams b))
     possibleTargetLocs = map (\(Move (_,to') _) -> to') (fromRight pms)
     fromTeam = getTeam (fromJust fromSquare)
     targetMoves = [ Move (from',to') b | Move (from',to') b <- fromRight pms, to' == to ]
-    commitMove mv = Game (getBoardFromMove mv) (tail teams) hmc fmn
+    commitMove mv = Game (getBoardFromMove mv) (tail teams) halfMoveInc fullMoveInc
+    halfMoveInc =
+      if characterAt fromSquare == Just Pawn
+        || not (isNothing (characterAt toSquare)) then
+        0
+      else
+        hmc + 1
+    fullMoveInc = case getAffinity fromTeam of
+      South -> fmn + 1
+      otherwise -> fmn
     promoTarget = [ Move (from',to') b | Move (from',to') b <- fromRight pms,
       getCharacter (fromJust (fromRight (pieceAt to' b))) == fromJust promo ]
 
 play :: Game -> Map.Map Team Mover -> [String] -> IO String
-play (Game b (t:teams) hmc fmn) moverMap msgs = do
+play g@(Game b (t:teams) _ _) moverMap msgs = do
   let
     turnsToTeams' = turnsToTeams teams
     maybeMover = Map.lookup t moverMap
@@ -73,7 +83,6 @@ play (Game b (t:teams) hmc fmn) moverMap msgs = do
   else do
     let
       ((from,to),promo) = fromJust potMove
-      g = Game b (t:teams) hmc fmn
       nextGame = performMove g (from,to) promo
     if isLeft nextGame then
       -- means there was a problem and the returned string is the error msg

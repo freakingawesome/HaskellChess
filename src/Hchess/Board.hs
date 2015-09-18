@@ -115,6 +115,10 @@ teamName (Team _ name) = name
 getCharacter :: Piece -> Character
 getCharacter (Piece _ c) = c
 
+characterAt :: Square -> Maybe Character
+characterAt (Nothing) = Nothing
+characterAt (Just (Piece _ c)) = Just c
+
 getAffinity :: Team -> Affinity
 getAffinity (Team a _) = a
 
