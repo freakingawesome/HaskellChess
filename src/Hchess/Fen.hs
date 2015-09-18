@@ -2,9 +2,12 @@ module Hchess.Fen where
 
 import Hchess.Board
 import Hchess.Game
-import Data.List (intercalate)
+import Data.List (intercalate,sortBy)
 import Data.Either.Unwrap
 import Data.Char (toLower)
+import Data.Maybe
+import qualified Data.HashSet as HS
+import Debug.Trace
 
 toFen :: Game -> String
 toFen (Game b (t@(Team _ tn):ts)) = intercalate "/" rows
@@ -54,5 +57,13 @@ toFenChar p = pieceNotHandled p
 pieceNotHandled p = error ("Piece not handled: " ++ show p)
 
 toCastlingRookAvailability :: Board -> String
-toCastlingRookAvailability (Board map cra _) = "TODO: Castling Rook Availability"
+toCastlingRookAvailability (Board map cra _) = fmap f (sortBy bottomLeftToTopRight $ HS.toList cra)
+  where
+    f loc = case loc of
+      (0,0) -> 'K'
+      (7,0) -> 'Q'
+      (0,7) -> 'k'
+      (7,7) -> 'q'
+      otherwise -> error "Invalid rook starting location"
+    bottomLeftToTopRight (ax,ay) (bx,by) = compare (ay,ax) (by,bx)
 
