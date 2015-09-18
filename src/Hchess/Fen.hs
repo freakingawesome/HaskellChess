@@ -15,6 +15,8 @@ toFen (Game b (t@(Team _ tn):ts)) = intercalate "/" rows
   ++ toLower (head tn) : ""
   ++ " "
   ++ toCastlingRookAvailability b
+  ++ " "
+  ++ toEnPassantTarget b
   where
     rows = map (toFenRow b) [7,6..0]
 
@@ -67,3 +69,6 @@ toCastlingRookAvailability (Board map cra _) = fmap f (sortBy bottomLeftToTopRig
       otherwise -> error "Invalid rook starting location"
     bottomLeftToTopRight (ax,ay) (bx,by) = compare (ay,ax) (by,bx)
 
+toEnPassantTarget :: Board -> String
+toEnPassantTarget (Board _ _ Nothing) = "-"
+toEnPassantTarget (Board _ _ (Just eps)) = toAlgebraicLocation eps
