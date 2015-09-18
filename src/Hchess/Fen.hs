@@ -10,13 +10,17 @@ import qualified Data.HashSet as HS
 import Debug.Trace
 
 toFen :: Game -> String
-toFen (Game b (t@(Team _ tn):ts)) = intercalate "/" rows
+toFen (Game b (t@(Team _ tn):ts) hmc fmn) = intercalate "/" rows
   ++ " "
   ++ toLower (head tn) : ""
   ++ " "
   ++ toCastlingRookAvailability b
   ++ " "
   ++ toEnPassantTarget b
+  ++ " "
+  ++ show hmc
+  ++ " "
+  ++ show fmn
   where
     rows = map (toFenRow b) [7,6..0]
 

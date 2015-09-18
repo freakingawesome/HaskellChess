@@ -56,7 +56,7 @@ spec = do
   describe "The game after the first white move" $ do
     let
       Right g = performMove newStandardGame (loc "a2",loc "a4") Nothing
-      Game b teams = g
+      Game b teams _ _ = g
       Right (Just (Piece t c)) = pieceAt (loc "a4") b
 
     it "should now be black's move" $ do
@@ -77,7 +77,7 @@ spec = do
 
     it "should allow a promotion" $ do
       let
-        Right (Game b _) = performMove g (loc "b7",loc "b8") (Just Queen)
+        Right (Game b _ _ _) = performMove g (loc "b7",loc "b8") (Just Queen)
 
       getCharacter (fromJust (fromRight (pieceAt (loc "b8") b))) `shouldBe` Queen
 
