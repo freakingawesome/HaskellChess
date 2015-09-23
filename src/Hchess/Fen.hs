@@ -63,15 +63,17 @@ toFenChar p = pieceNotHandled p
 pieceNotHandled p = error ("Piece not handled: " ++ show p)
 
 toCastlingRookAvailability :: Board -> String
-toCastlingRookAvailability (Board map cra _) = fmap f (sortBy bottomLeftToTopRight $ HS.toList cra)
+toCastlingRookAvailability (Board map cra _) = hyphenIfNull $ fmap showPiecAtLoc sortedLocs
   where
-    f loc = case loc of
+    showPiecAtLoc loc = case loc of
       (0,0) -> 'K'
       (7,0) -> 'Q'
       (0,7) -> 'k'
       (7,7) -> 'q'
       otherwise -> error "Invalid rook starting location"
     bottomLeftToTopRight (ax,ay) (bx,by) = compare (ay,ax) (by,bx)
+    sortedLocs = sortBy bottomLeftToTopRight $ HS.toList cra
+    hyphenIfNull s = if null s then "-" else s
 
 toEnPassantTarget :: Board -> String
 toEnPassantTarget (Board _ _ Nothing) = "-"
